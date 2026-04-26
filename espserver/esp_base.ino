@@ -44,17 +44,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   memcpy(buffalo, payload, length);
   buffalo[length] = '\0'; 
 
-  client.publish("test/t", topCopy);
-  client.publish("test/t", message);
   if (strcmp(topCopy, "sensors/control") == 0) {
     StaticJsonDocument<200> doc;
     deserializeJson(doc, buffalo, length);
 
-    if (doc["cmd"] == "GET" && doc["sensor"] == "wind") {
-      client.publish("test/t", "> arduino");
-      serializeJson(doc, arduinoSerial);
-      arduinoSerial.print('\n');
-      delay(10);
+    if (doc["cmd"] == "GET") {
+      if (doc["sensor"] == "wind" || doc["sensor"] == "temperature" || doc["sensor"] == "humidity") {
+        serializeJson(doc, arduinoSerial);
+        arduinoSerial.print('\n');
+        delay(10);
+      }
     }
   }
 }
@@ -62,7 +61,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   while (!client.connected()) {
-    if (client.connect("dadaqfeq")) {
+    if (client.connect("ESP8266_Client")) {
       client.subscribe("sensors/control");
       client.publish("test/t", "esp subscribed to sensors/control");
     } else {
@@ -72,12 +71,13 @@ void reconnect() {
 }
 
 unsigned long lastMsg = 0;
+bool heartBeat = false;
 void loop() {
   if (!client.connected()) reconnect();
   client.loop();
 
   unsigned long now = millis();
-  if (now - lastMsg > 10000) {
+  if ( heartBeat && (now - lastMsg > 10000) ) {
     lastMsg = now;
     client.publish("test/t", "{\"msg\":\"heartbeat\"}");
   }
@@ -87,12 +87,12 @@ void loop() {
   input.trim();
 
   if (input.length() > 0) {
-    client.publish("test/t", input.c_str());
+    // client.publish("test/t", input.c_str());
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, input);
 
     if (!error) {
-      client.publish("test/t", "JSON OK");
+      // client.publish("test/t", "JSON OK");
       
       StaticJsonDocument<256> rdoc;
       const char* sPath = "sensors/data/unknown";
@@ -107,6 +107,10 @@ void loop() {
         sPath = "sensors/data/temperature";
         rdoc["temperature"] = doc["temperature"];
         knownSensor = true;
+      } else if (doc["sensor"] == "humidity") {
+        sPath = "sensors/data/humidity";
+        rdoc["humidity"] = doc["humidity"];
+        knownSensor = true;
       }
 
       if (knownSensor) {
@@ -118,8 +122,8 @@ void loop() {
       }
     } else {
       // Если ошибка парсинга, пишем в отладку саму строку
-      String errMsg = "JSON Err: " + input;
-      client.publish("test/t", errMsg.c_str());
+      // String errMsg = "JSON Err: " + input;
+      // client.publish("test/t", errMsg.c_str());
     }
   }
  }

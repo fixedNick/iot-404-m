@@ -5,6 +5,7 @@
 
 #define INPUT_VOLTAGE_PIN A0
 #define INPUT_TEMP_PIN A1
+#define INPUT_HUMIDITY_PIN 2
 #define SPEED_MLT 21.375
 
 #define ARDUINO_GSM_RX_PIN 3
@@ -57,6 +58,10 @@ void loop() {
             else if (strcmp(sensor, "temperature") == 0) {
               doc["temperature"] = getTemperature();
               sendResponse(espSerial, doc);
+            } 
+            else if (strcmp(sensor, "humidity") == 0) {
+                doc["humidity"] = -404.404;
+                sendResponse(espSerial, doc);
             }
         }
       }
