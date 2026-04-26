@@ -10,7 +10,7 @@ service ESP8266 {
 }
 
 message WindSpeedResponse { 
-    int32 status = 1;
-    string message = 2; 
-    double speed = 3;
+    float voltage = 1;
+    float speed = 2; 
+    int64 time = 3;
 }
