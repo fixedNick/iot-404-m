@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package iot404;
+option go_package = "./pb";
+
+service ESP8266 {
+  rpc windspeed (google.protobuf.Empty) returns (WindSpeedResponse) {}
+}
+
+message WindSpeedResponse { 
+    int32 status = 1;
+    string message = 2; 
+    double speed = 3;
+}

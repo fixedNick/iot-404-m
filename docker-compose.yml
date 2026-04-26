@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    restart: always
+    ports:
+      - "1883:1883"   # Основной порт для ESP и Go
+      - "9001:9001"   # Порт для WebSockets (если понадобится для Web-UI)
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+
+  go-server:
+    build: ./server                  # путь к Dockerfile
+    container_name: go-server
+    restart: always
+    ports:
+      - "50051:50051"                 # снаружи:внутри, если ваш сервер слушает 8080
+    depends_on:
+      - mqtt                         # запускать только после старта mqtt
+volumes:
+  mqtt-data:
+  mqtt-log:

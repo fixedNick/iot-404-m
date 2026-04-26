@@ -1,0 +1,5 @@
+Local:
+  Port: 50051
+EspServer:
+  Host: "0.0.0.0"
+  Port: 50051
