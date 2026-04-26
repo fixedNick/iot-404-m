@@ -14,10 +14,7 @@ import (
 )
 
 func main() {
-	storage, err := domain.NewStorage("data.txt")
-	if err != nil {
-		panic(err)
-	}
+	storage := domain.NewStorage()
 
 	mqttClient := domain.NewMQTTClient("176.109.106.237", 1883, fmt.Sprintf("go-%d", time.Now().Unix()), nil)
 	defer mqttClient.Disconnect()
@@ -38,12 +35,12 @@ func main() {
 
 			w := Wind{}
 			json.Unmarshal(msg.Payload(), &w)
-			n, err := storage.Save(domain.NewIndication(w.Voltage, w.Speed, time.Now()))
+			err := storage.Save(domain.NewIndication(w.Voltage, w.Speed, time.Now()))
 			if err != nil {
 				fmt.Printf("[error] Save err: %v. Received: %v", err, w)
 				return
 			}
-			fmt.Printf("Saved %v. Wrote %d bytes", w, n)
+			fmt.Printf("Saved %v.\n-----------------\n", w)
 			mqttClient.Sync <- struct{}{}
 		})
 		go mqttClient.Subscribe("sensors/data/temperature", domain.QoS_HIGH, func(client mqtt.Client, msg mqtt.Message) {

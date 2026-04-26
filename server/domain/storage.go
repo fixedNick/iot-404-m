@@ -1,16 +1,14 @@
 package domain
 
 import (
-	"bufio"
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
 	"time"
 )
 
 // Linked list
 
+// TODO:
+// rewrite linked list
+// current error: on max_size exceed and next save - panic
 type List struct {
 	head         *Indication
 	end          *Indication
@@ -24,6 +22,11 @@ func (l *List) Save(head *Indication) {
 		l.end = l.end.prev
 		tmp.prev = nil
 		l.head.prev = head
+		l.head = head
+		return
+	}
+
+	if l.head == nil {
 		l.head = head
 		return
 	}
@@ -76,76 +79,16 @@ type Storage struct {
 	localList List
 }
 
-func NewStorage(path string) (*Storage, error) {
-
-	lstat, err := os.Lstat(path)
-	if err != nil {
-		_, err := os.Create(path)
-		if err != nil {
-			return nil, err
-		}
-		lstat, err = os.Lstat(path)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if !lstat.Mode().IsRegular() {
-		return nil, fmt.Errorf("Storage file must be a regular file")
-	}
-
+func NewStorage() *Storage {
 	return &Storage{
-		path:      path,
 		localList: List{max_size: 10},
-	}, nil
+	}
 }
-func (s *Storage) Save(v Indication) (int, error) {
-	f, err := os.OpenFile(s.path, os.O_APPEND, 0644)
-	if err != nil {
-		return 0, err
-	}
-
-	defer f.Close()
-
-	bytes, err := json.Marshal(v)
-	bytes = append(bytes, '\n')
-	if err != nil {
-		return 0, err
-	}
-	n, err := f.Write(bytes)
-	if err != nil {
-		return 0, err
-	}
-
+func (s *Storage) Save(v Indication) error {
 	s.localList.Save(&v)
-	return n, nil
+	return nil
 }
 
 func (s *Storage) Last() *Indication {
 	return s.localList.LastIn()
-}
-
-func (s *Storage) LoadLast() error {
-	f, err := os.OpenFile(s.path, os.O_RDONLY, 0644)
-	if err != nil {
-		return err
-	}
-	rd := bufio.NewReader(f)
-
-	var lastErr error = nil
-	var counter int = 0
-	for lastErr == nil && counter < 10 {
-		l, err := rd.ReadBytes('\n')
-		if err != nil && err != io.EOF {
-			return err
-		}
-
-		indication := Indication{}
-		err = json.Unmarshal(l, &indication)
-		if err != nil {
-			return err
-		}
-
-		s.localList.Save(&indication)
-	}
-	return nil
 }
