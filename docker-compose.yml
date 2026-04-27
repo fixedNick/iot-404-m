@@ -18,9 +18,28 @@ services:
     container_name: go-server
     restart: always
     ports:
-      - "50051:50051"                 # снаружи:внутри, если ваш сервер слушает 8080
+      - "${GRPC_PORT}:${GRPC_PORT}"                 # снаружи:внутри, если ваш сервер слушает 8080
     depends_on:
       - mqtt                         # запускать только после старта mqtt
+    env_file:
+      - env/.env.go.app
+      - env/.env.db
+  
+  db:
+    image: mysql:8.0
+    container_name: ${MYSQL_CONTAINER_NAME}
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - env/.env.db
+
 volumes:
   mqtt-data:
   mqtt-log:
