@@ -1,0 +1,35 @@
+version: '3'
+
+vars:
+  PROTO_SRC: proto/v1
+  GO_OUT: server/pb
+  DART_OUT: client/lib/generated/iot404
+
+tasks:
+  gen-proto:
+    desc: Generates code from .proto files
+    cmds:
+      - powershell mkdir -Force -p {{.GO_OUT}}
+      - powershell mkdir -Force -p {{.DART_OUT}}
+      - >
+        protoc 
+        -I {{.PROTO_SRC}}
+        --go_out={{.GO_OUT}} --go_opt=paths=source_relative
+        --go-grpc_out={{.GO_OUT}} --go-grpc_opt=paths=source_relative
+        {{.PROTO_SRC}}/*.proto
+      - >
+        protoc 
+        -I {{.PROTO_SRC}}
+        --dart_out=grpc:{{.DART_OUT}}
+        {{.PROTO_SRC}}/*.proto
+    sources:
+      - "{{.PROTO_SRC}}/**/*.proto"
+    generates:
+      - "{{.GO_OUT}}/*.go"
+      - "{{.DART_OUT}}*.dart"
+
+  clean:
+    desc: Delete generated code
+    cmds:
+      - rm -rf {{.GO_OUT}}/*
+      - rm -rf {{.DART_OUT}}/*
