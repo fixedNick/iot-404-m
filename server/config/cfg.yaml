@@ -3,3 +3,9 @@ Local:
 EspServer:
   Host: "0.0.0.0"
   Port: 50051
+MySQL:
+  Host: "127.0.0.1"
+  Port: 3306
+  User: "root"
+  Password: "root"
+  Database: "iot404"
