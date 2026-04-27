@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v4.25.2
-// source: protos/service.proto
+// source: service.proto
 
 package pb
 
@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,103 +19,259 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ESP8266_Windspeed_FullMethodName = "/iot404.ESP8266/windspeed"
+	ESP8266Service_WindSpeed_FullMethodName       = "/iot404.v1.ESP8266Service/WindSpeed"
+	ESP8266Service_Temperature_FullMethodName     = "/iot404.v1.ESP8266Service/Temperature"
+	ESP8266Service_Humidity_FullMethodName        = "/iot404.v1.ESP8266Service/Humidity"
+	ESP8266Service_AutoCollect_FullMethodName     = "/iot404.v1.ESP8266Service/AutoCollect"
+	ESP8266Service_StopAutoCollect_FullMethodName = "/iot404.v1.ESP8266Service/StopAutoCollect"
 )
 
-// ESP8266Client is the client API for ESP8266 service.
+// ESP8266ServiceClient is the client API for ESP8266Service service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ESP8266Client interface {
-	Windspeed(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*WindSpeedResponse, error)
+type ESP8266ServiceClient interface {
+	// -- getters
+	WindSpeed(ctx context.Context, in *WindSpeedRequest, opts ...grpc.CallOption) (*WindSpeedResponse, error)
+	Temperature(ctx context.Context, in *TemperatureRequest, opts ...grpc.CallOption) (*TemperatureResponse, error)
+	Humidity(ctx context.Context, in *HumidityRequest, opts ...grpc.CallOption) (*HumidityResponse, error)
+	// -- end getters
+	AutoCollect(ctx context.Context, in *AutoCollectRequest, opts ...grpc.CallOption) (*AutoCollectResponse, error)
+	StopAutoCollect(ctx context.Context, in *StopAutoCollectRequest, opts ...grpc.CallOption) (*StopAutoCollectResponse, error)
 }
 
-type eSP8266Client struct {
+type eSP8266ServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewESP8266Client(cc grpc.ClientConnInterface) ESP8266Client {
-	return &eSP8266Client{cc}
+func NewESP8266ServiceClient(cc grpc.ClientConnInterface) ESP8266ServiceClient {
+	return &eSP8266ServiceClient{cc}
 }
 
-func (c *eSP8266Client) Windspeed(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*WindSpeedResponse, error) {
+func (c *eSP8266ServiceClient) WindSpeed(ctx context.Context, in *WindSpeedRequest, opts ...grpc.CallOption) (*WindSpeedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(WindSpeedResponse)
-	err := c.cc.Invoke(ctx, ESP8266_Windspeed_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ESP8266Service_WindSpeed_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ESP8266Server is the server API for ESP8266 service.
-// All implementations must embed UnimplementedESP8266Server
-// for forward compatibility.
-type ESP8266Server interface {
-	Windspeed(context.Context, *emptypb.Empty) (*WindSpeedResponse, error)
-	mustEmbedUnimplementedESP8266Server()
+func (c *eSP8266ServiceClient) Temperature(ctx context.Context, in *TemperatureRequest, opts ...grpc.CallOption) (*TemperatureResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TemperatureResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_Temperature_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// UnimplementedESP8266Server must be embedded to have
+func (c *eSP8266ServiceClient) Humidity(ctx context.Context, in *HumidityRequest, opts ...grpc.CallOption) (*HumidityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HumidityResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_Humidity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eSP8266ServiceClient) AutoCollect(ctx context.Context, in *AutoCollectRequest, opts ...grpc.CallOption) (*AutoCollectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AutoCollectResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_AutoCollect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eSP8266ServiceClient) StopAutoCollect(ctx context.Context, in *StopAutoCollectRequest, opts ...grpc.CallOption) (*StopAutoCollectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StopAutoCollectResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_StopAutoCollect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ESP8266ServiceServer is the server API for ESP8266Service service.
+// All implementations must embed UnimplementedESP8266ServiceServer
+// for forward compatibility.
+type ESP8266ServiceServer interface {
+	// -- getters
+	WindSpeed(context.Context, *WindSpeedRequest) (*WindSpeedResponse, error)
+	Temperature(context.Context, *TemperatureRequest) (*TemperatureResponse, error)
+	Humidity(context.Context, *HumidityRequest) (*HumidityResponse, error)
+	// -- end getters
+	AutoCollect(context.Context, *AutoCollectRequest) (*AutoCollectResponse, error)
+	StopAutoCollect(context.Context, *StopAutoCollectRequest) (*StopAutoCollectResponse, error)
+	mustEmbedUnimplementedESP8266ServiceServer()
+}
+
+// UnimplementedESP8266ServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedESP8266Server struct{}
+type UnimplementedESP8266ServiceServer struct{}
 
-func (UnimplementedESP8266Server) Windspeed(context.Context, *emptypb.Empty) (*WindSpeedResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Windspeed not implemented")
+func (UnimplementedESP8266ServiceServer) WindSpeed(context.Context, *WindSpeedRequest) (*WindSpeedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method WindSpeed not implemented")
 }
-func (UnimplementedESP8266Server) mustEmbedUnimplementedESP8266Server() {}
-func (UnimplementedESP8266Server) testEmbeddedByValue()                 {}
+func (UnimplementedESP8266ServiceServer) Temperature(context.Context, *TemperatureRequest) (*TemperatureResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Temperature not implemented")
+}
+func (UnimplementedESP8266ServiceServer) Humidity(context.Context, *HumidityRequest) (*HumidityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Humidity not implemented")
+}
+func (UnimplementedESP8266ServiceServer) AutoCollect(context.Context, *AutoCollectRequest) (*AutoCollectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AutoCollect not implemented")
+}
+func (UnimplementedESP8266ServiceServer) StopAutoCollect(context.Context, *StopAutoCollectRequest) (*StopAutoCollectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method StopAutoCollect not implemented")
+}
+func (UnimplementedESP8266ServiceServer) mustEmbedUnimplementedESP8266ServiceServer() {}
+func (UnimplementedESP8266ServiceServer) testEmbeddedByValue()                        {}
 
-// UnsafeESP8266Server may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ESP8266Server will
+// UnsafeESP8266ServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ESP8266ServiceServer will
 // result in compilation errors.
-type UnsafeESP8266Server interface {
-	mustEmbedUnimplementedESP8266Server()
+type UnsafeESP8266ServiceServer interface {
+	mustEmbedUnimplementedESP8266ServiceServer()
 }
 
-func RegisterESP8266Server(s grpc.ServiceRegistrar, srv ESP8266Server) {
-	// If the following call panics, it indicates UnimplementedESP8266Server was
+func RegisterESP8266ServiceServer(s grpc.ServiceRegistrar, srv ESP8266ServiceServer) {
+	// If the following call panics, it indicates UnimplementedESP8266ServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&ESP8266_ServiceDesc, srv)
+	s.RegisterService(&ESP8266Service_ServiceDesc, srv)
 }
 
-func _ESP8266_Windspeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+func _ESP8266Service_WindSpeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WindSpeedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ESP8266Server).Windspeed(ctx, in)
+		return srv.(ESP8266ServiceServer).WindSpeed(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ESP8266_Windspeed_FullMethodName,
+		FullMethod: ESP8266Service_WindSpeed_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ESP8266Server).Windspeed(ctx, req.(*emptypb.Empty))
+		return srv.(ESP8266ServiceServer).WindSpeed(ctx, req.(*WindSpeedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ESP8266_ServiceDesc is the grpc.ServiceDesc for ESP8266 service.
+func _ESP8266Service_Temperature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TemperatureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).Temperature(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_Temperature_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).Temperature(ctx, req.(*TemperatureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ESP8266Service_Humidity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HumidityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).Humidity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_Humidity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).Humidity(ctx, req.(*HumidityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ESP8266Service_AutoCollect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AutoCollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).AutoCollect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_AutoCollect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).AutoCollect(ctx, req.(*AutoCollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ESP8266Service_StopAutoCollect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopAutoCollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).StopAutoCollect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_StopAutoCollect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).StopAutoCollect(ctx, req.(*StopAutoCollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ESP8266Service_ServiceDesc is the grpc.ServiceDesc for ESP8266Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ESP8266_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "iot404.ESP8266",
-	HandlerType: (*ESP8266Server)(nil),
+var ESP8266Service_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "iot404.v1.ESP8266Service",
+	HandlerType: (*ESP8266ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "windspeed",
-			Handler:    _ESP8266_Windspeed_Handler,
+			MethodName: "WindSpeed",
+			Handler:    _ESP8266Service_WindSpeed_Handler,
+		},
+		{
+			MethodName: "Temperature",
+			Handler:    _ESP8266Service_Temperature_Handler,
+		},
+		{
+			MethodName: "Humidity",
+			Handler:    _ESP8266Service_Humidity_Handler,
+		},
+		{
+			MethodName: "AutoCollect",
+			Handler:    _ESP8266Service_AutoCollect_Handler,
+		},
+		{
+			MethodName: "StopAutoCollect",
+			Handler:    _ESP8266Service_StopAutoCollect_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "protos/service.proto",
+	Metadata: "service.proto",
 }

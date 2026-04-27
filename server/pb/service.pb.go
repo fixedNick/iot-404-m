@@ -2,14 +2,13 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v4.25.2
-// source: protos/service.proto
+// source: service.proto
 
 package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,18 +21,126 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type WindSpeedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WindSpeedRequest) Reset() {
+	*x = WindSpeedRequest{}
+	mi := &file_service_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WindSpeedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WindSpeedRequest) ProtoMessage() {}
+
+func (x *WindSpeedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WindSpeedRequest.ProtoReflect.Descriptor instead.
+func (*WindSpeedRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{0}
+}
+
+type TemperatureRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TemperatureRequest) Reset() {
+	*x = TemperatureRequest{}
+	mi := &file_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TemperatureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TemperatureRequest) ProtoMessage() {}
+
+func (x *TemperatureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TemperatureRequest.ProtoReflect.Descriptor instead.
+func (*TemperatureRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{1}
+}
+
+type HumidityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HumidityRequest) Reset() {
+	*x = HumidityRequest{}
+	mi := &file_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HumidityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HumidityRequest) ProtoMessage() {}
+
+func (x *HumidityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HumidityRequest.ProtoReflect.Descriptor instead.
+func (*HumidityRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{2}
+}
+
 type WindSpeedResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	Speed         float64                `protobuf:"fixed64,3,opt,name=speed,proto3" json:"speed,omitempty"`
+	Voltage       float32                `protobuf:"fixed32,1,opt,name=voltage,proto3" json:"voltage,omitempty"`
+	Speed         float32                `protobuf:"fixed32,2,opt,name=speed,proto3" json:"speed,omitempty"`
+	Time          int64                  `protobuf:"varint,3,opt,name=time,proto3" json:"time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *WindSpeedResponse) Reset() {
 	*x = WindSpeedResponse{}
-	mi := &file_protos_service_proto_msgTypes[0]
+	mi := &file_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +152,7 @@ func (x *WindSpeedResponse) String() string {
 func (*WindSpeedResponse) ProtoMessage() {}
 
 func (x *WindSpeedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_service_proto_msgTypes[0]
+	mi := &file_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,89 +165,424 @@ func (x *WindSpeedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WindSpeedResponse.ProtoReflect.Descriptor instead.
 func (*WindSpeedResponse) Descriptor() ([]byte, []int) {
-	return file_protos_service_proto_rawDescGZIP(), []int{0}
+	return file_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *WindSpeedResponse) GetStatus() int32 {
+func (x *WindSpeedResponse) GetVoltage() float32 {
 	if x != nil {
-		return x.Status
+		return x.Voltage
 	}
 	return 0
 }
 
-func (x *WindSpeedResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *WindSpeedResponse) GetSpeed() float64 {
+func (x *WindSpeedResponse) GetSpeed() float32 {
 	if x != nil {
 		return x.Speed
 	}
 	return 0
 }
 
-var File_protos_service_proto protoreflect.FileDescriptor
+func (x *WindSpeedResponse) GetTime() int64 {
+	if x != nil {
+		return x.Time
+	}
+	return 0
+}
 
-const file_protos_service_proto_rawDesc = "" +
+type TemperatureResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Temperature   float32                `protobuf:"fixed32,1,opt,name=temperature,proto3" json:"temperature,omitempty"`
+	Time          int64                  `protobuf:"varint,2,opt,name=time,proto3" json:"time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TemperatureResponse) Reset() {
+	*x = TemperatureResponse{}
+	mi := &file_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TemperatureResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TemperatureResponse) ProtoMessage() {}
+
+func (x *TemperatureResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TemperatureResponse.ProtoReflect.Descriptor instead.
+func (*TemperatureResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TemperatureResponse) GetTemperature() float32 {
+	if x != nil {
+		return x.Temperature
+	}
+	return 0
+}
+
+func (x *TemperatureResponse) GetTime() int64 {
+	if x != nil {
+		return x.Time
+	}
+	return 0
+}
+
+type HumidityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Humidity      float32                `protobuf:"fixed32,1,opt,name=humidity,proto3" json:"humidity,omitempty"`
+	Time          int64                  `protobuf:"varint,2,opt,name=time,proto3" json:"time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HumidityResponse) Reset() {
+	*x = HumidityResponse{}
+	mi := &file_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HumidityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HumidityResponse) ProtoMessage() {}
+
+func (x *HumidityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HumidityResponse.ProtoReflect.Descriptor instead.
+func (*HumidityResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *HumidityResponse) GetHumidity() float32 {
+	if x != nil {
+		return x.Humidity
+	}
+	return 0
+}
+
+func (x *HumidityResponse) GetTime() int64 {
+	if x != nil {
+		return x.Time
+	}
+	return 0
+}
+
+type StopAutoCollectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sensor        string                 `protobuf:"bytes,1,opt,name=sensor,proto3" json:"sensor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StopAutoCollectRequest) Reset() {
+	*x = StopAutoCollectRequest{}
+	mi := &file_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StopAutoCollectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StopAutoCollectRequest) ProtoMessage() {}
+
+func (x *StopAutoCollectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StopAutoCollectRequest.ProtoReflect.Descriptor instead.
+func (*StopAutoCollectRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *StopAutoCollectRequest) GetSensor() string {
+	if x != nil {
+		return x.Sensor
+	}
+	return ""
+}
+
+type AutoCollectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sensor        string                 `protobuf:"bytes,1,opt,name=sensor,proto3" json:"sensor,omitempty"`
+	Period        uint64                 `protobuf:"varint,2,opt,name=period,proto3" json:"period,omitempty"`
+	Duration      uint64                 `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AutoCollectRequest) Reset() {
+	*x = AutoCollectRequest{}
+	mi := &file_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AutoCollectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AutoCollectRequest) ProtoMessage() {}
+
+func (x *AutoCollectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AutoCollectRequest.ProtoReflect.Descriptor instead.
+func (*AutoCollectRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AutoCollectRequest) GetSensor() string {
+	if x != nil {
+		return x.Sensor
+	}
+	return ""
+}
+
+func (x *AutoCollectRequest) GetPeriod() uint64 {
+	if x != nil {
+		return x.Period
+	}
+	return 0
+}
+
+func (x *AutoCollectRequest) GetDuration() uint64 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+type AutoCollectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AutoCollectResponse) Reset() {
+	*x = AutoCollectResponse{}
+	mi := &file_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AutoCollectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AutoCollectResponse) ProtoMessage() {}
+
+func (x *AutoCollectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AutoCollectResponse.ProtoReflect.Descriptor instead.
+func (*AutoCollectResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AutoCollectResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type StopAutoCollectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StopAutoCollectResponse) Reset() {
+	*x = StopAutoCollectResponse{}
+	mi := &file_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StopAutoCollectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StopAutoCollectResponse) ProtoMessage() {}
+
+func (x *StopAutoCollectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StopAutoCollectResponse.ProtoReflect.Descriptor instead.
+func (*StopAutoCollectResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *StopAutoCollectResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+var File_service_proto protoreflect.FileDescriptor
+
+const file_service_proto_rawDesc = "" +
 	"\n" +
-	"\x14protos/service.proto\x12\x06iot404\x1a\x1bgoogle/protobuf/empty.proto\"[\n" +
-	"\x11WindSpeedResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\x05R\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\x14\n" +
-	"\x05speed\x18\x03 \x01(\x01R\x05speed2K\n" +
-	"\aESP8266\x12@\n" +
-	"\twindspeed\x12\x16.google.protobuf.Empty\x1a\x19.iot404.WindSpeedResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\rservice.proto\x12\tiot404.v1\"\x12\n" +
+	"\x10WindSpeedRequest\"\x14\n" +
+	"\x12TemperatureRequest\"\x11\n" +
+	"\x0fHumidityRequest\"W\n" +
+	"\x11WindSpeedResponse\x12\x18\n" +
+	"\avoltage\x18\x01 \x01(\x02R\avoltage\x12\x14\n" +
+	"\x05speed\x18\x02 \x01(\x02R\x05speed\x12\x12\n" +
+	"\x04time\x18\x03 \x01(\x03R\x04time\"K\n" +
+	"\x13TemperatureResponse\x12 \n" +
+	"\vtemperature\x18\x01 \x01(\x02R\vtemperature\x12\x12\n" +
+	"\x04time\x18\x02 \x01(\x03R\x04time\"B\n" +
+	"\x10HumidityResponse\x12\x1a\n" +
+	"\bhumidity\x18\x01 \x01(\x02R\bhumidity\x12\x12\n" +
+	"\x04time\x18\x02 \x01(\x03R\x04time\"0\n" +
+	"\x16StopAutoCollectRequest\x12\x16\n" +
+	"\x06sensor\x18\x01 \x01(\tR\x06sensor\"`\n" +
+	"\x12AutoCollectRequest\x12\x16\n" +
+	"\x06sensor\x18\x01 \x01(\tR\x06sensor\x12\x16\n" +
+	"\x06period\x18\x02 \x01(\x04R\x06period\x12\x1a\n" +
+	"\bduration\x18\x03 \x01(\x04R\bduration\"/\n" +
+	"\x13AutoCollectResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"3\n" +
+	"\x17StopAutoCollectResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x9d\x03\n" +
+	"\x0eESP8266Service\x12H\n" +
+	"\tWindSpeed\x12\x1b.iot404.v1.WindSpeedRequest\x1a\x1c.iot404.v1.WindSpeedResponse\"\x00\x12N\n" +
+	"\vTemperature\x12\x1d.iot404.v1.TemperatureRequest\x1a\x1e.iot404.v1.TemperatureResponse\"\x00\x12E\n" +
+	"\bHumidity\x12\x1a.iot404.v1.HumidityRequest\x1a\x1b.iot404.v1.HumidityResponse\"\x00\x12N\n" +
+	"\vAutoCollect\x12\x1d.iot404.v1.AutoCollectRequest\x1a\x1e.iot404.v1.AutoCollectResponse\"\x00\x12Z\n" +
+	"\x0fStopAutoCollect\x12!.iot404.v1.StopAutoCollectRequest\x1a\".iot404.v1.StopAutoCollectResponse\"\x00B\x06Z\x04./pbb\x06proto3"
 
 var (
-	file_protos_service_proto_rawDescOnce sync.Once
-	file_protos_service_proto_rawDescData []byte
+	file_service_proto_rawDescOnce sync.Once
+	file_service_proto_rawDescData []byte
 )
 
-func file_protos_service_proto_rawDescGZIP() []byte {
-	file_protos_service_proto_rawDescOnce.Do(func() {
-		file_protos_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protos_service_proto_rawDesc), len(file_protos_service_proto_rawDesc)))
+func file_service_proto_rawDescGZIP() []byte {
+	file_service_proto_rawDescOnce.Do(func() {
+		file_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_service_proto_rawDesc), len(file_service_proto_rawDesc)))
 	})
-	return file_protos_service_proto_rawDescData
+	return file_service_proto_rawDescData
 }
 
-var file_protos_service_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_protos_service_proto_goTypes = []any{
-	(*WindSpeedResponse)(nil), // 0: iot404.WindSpeedResponse
-	(*emptypb.Empty)(nil),     // 1: google.protobuf.Empty
+var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_service_proto_goTypes = []any{
+	(*WindSpeedRequest)(nil),        // 0: iot404.v1.WindSpeedRequest
+	(*TemperatureRequest)(nil),      // 1: iot404.v1.TemperatureRequest
+	(*HumidityRequest)(nil),         // 2: iot404.v1.HumidityRequest
+	(*WindSpeedResponse)(nil),       // 3: iot404.v1.WindSpeedResponse
+	(*TemperatureResponse)(nil),     // 4: iot404.v1.TemperatureResponse
+	(*HumidityResponse)(nil),        // 5: iot404.v1.HumidityResponse
+	(*StopAutoCollectRequest)(nil),  // 6: iot404.v1.StopAutoCollectRequest
+	(*AutoCollectRequest)(nil),      // 7: iot404.v1.AutoCollectRequest
+	(*AutoCollectResponse)(nil),     // 8: iot404.v1.AutoCollectResponse
+	(*StopAutoCollectResponse)(nil), // 9: iot404.v1.StopAutoCollectResponse
 }
-var file_protos_service_proto_depIdxs = []int32{
-	1, // 0: iot404.ESP8266.windspeed:input_type -> google.protobuf.Empty
-	0, // 1: iot404.ESP8266.windspeed:output_type -> iot404.WindSpeedResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+var file_service_proto_depIdxs = []int32{
+	0, // 0: iot404.v1.ESP8266Service.WindSpeed:input_type -> iot404.v1.WindSpeedRequest
+	1, // 1: iot404.v1.ESP8266Service.Temperature:input_type -> iot404.v1.TemperatureRequest
+	2, // 2: iot404.v1.ESP8266Service.Humidity:input_type -> iot404.v1.HumidityRequest
+	7, // 3: iot404.v1.ESP8266Service.AutoCollect:input_type -> iot404.v1.AutoCollectRequest
+	6, // 4: iot404.v1.ESP8266Service.StopAutoCollect:input_type -> iot404.v1.StopAutoCollectRequest
+	3, // 5: iot404.v1.ESP8266Service.WindSpeed:output_type -> iot404.v1.WindSpeedResponse
+	4, // 6: iot404.v1.ESP8266Service.Temperature:output_type -> iot404.v1.TemperatureResponse
+	5, // 7: iot404.v1.ESP8266Service.Humidity:output_type -> iot404.v1.HumidityResponse
+	8, // 8: iot404.v1.ESP8266Service.AutoCollect:output_type -> iot404.v1.AutoCollectResponse
+	9, // 9: iot404.v1.ESP8266Service.StopAutoCollect:output_type -> iot404.v1.StopAutoCollectResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_protos_service_proto_init() }
-func file_protos_service_proto_init() {
-	if File_protos_service_proto != nil {
+func init() { file_service_proto_init() }
+func file_service_proto_init() {
+	if File_service_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_service_proto_rawDesc), len(file_protos_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_service_proto_rawDesc), len(file_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_protos_service_proto_goTypes,
-		DependencyIndexes: file_protos_service_proto_depIdxs,
-		MessageInfos:      file_protos_service_proto_msgTypes,
+		GoTypes:           file_service_proto_goTypes,
+		DependencyIndexes: file_service_proto_depIdxs,
+		MessageInfos:      file_service_proto_msgTypes,
 	}.Build()
-	File_protos_service_proto = out.File
-	file_protos_service_proto_goTypes = nil
-	file_protos_service_proto_depIdxs = nil
+	File_service_proto = out.File
+	file_service_proto_goTypes = nil
+	file_service_proto_depIdxs = nil
 }
