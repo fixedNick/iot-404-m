@@ -74,6 +74,7 @@ func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (
 func (gs *GRPCServer) Temperature(ctx context.Context, req *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
+	// todo: pass context cancel into func and canlcel on value returned
 	temp, err := gs.shead.GetTemperature(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))

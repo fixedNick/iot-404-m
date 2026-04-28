@@ -2,9 +2,9 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
-#include "DHT.h"
+#include <DHT11.h>
 
-DHT dht(DHTPIN, DHT11);
+DHT11 dht11(2);
 
 #define INPUT_VOLTAGE_PIN A0
 #define INPUT_TEMP_PIN A1
@@ -28,7 +28,6 @@ void setup() {
   espSerial.begin(9600);
   // espSerial.listen();
   // gsmSerial.begin(9600);
-  dht.begin();
   pinMode(INPUT_VOLTAGE_PIN, INPUT);
   //setupDisplay();
 }
@@ -73,10 +72,10 @@ void loop() {
   }
 }
 
-float getHumidity() {
-  float h = dht.readHumidity();
+int getHumidity() {
+  int h = dht11.readHumidity();
   if (isnan(h)) {
-    return 0.0;
+    return 0;
   }
   return h;
 }
@@ -131,7 +130,13 @@ float getVoltageAvg() {
 }
 
 float getTemperature() {
-  float raw = analogRead(INPUT_TEMP_PIN);
-  float temp = raw/1023.0*500.0;
+  float sum = 0;
+  for(int i = 0; i < 10; i++) {
+    float raw = analogRead(INPUT_TEMP_PIN);
+    sum += raw;
+    delay(2);
+  }
+
+  float temp = sum/10/1023.0*500.0;
   return temp;
 }
