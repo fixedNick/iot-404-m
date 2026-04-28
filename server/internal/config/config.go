@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -39,7 +41,14 @@ func (m MySQLConfig) DSN() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", m.User, m.Password, m.Host, m.Port, m.Database)
 }
 
-func MustLoadConfig() *Config {
+func MustLoadConfig(env_files ...string) *Config {
+	if len(env_files) > 0 {
+		err := godotenv.Load(env_files...)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	cfg := Config{}
 
 	var err error

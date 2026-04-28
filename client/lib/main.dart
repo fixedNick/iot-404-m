@@ -251,7 +251,7 @@ class _AnemometerPageState extends State<AnemometerPage> {
                             style: TextStyle(fontSize: 18.sp),
                           ),
                           Text(
-                            "${data.speed} м/с (${data.voltage}V)",
+                            "${data.speed!.toStringAsPrecision(2)} м/с (${data.voltage!.toStringAsPrecision(2)}V)",
                             style: TextStyle(
                               fontSize: 40.sp,
                               fontWeight: FontWeight.bold,

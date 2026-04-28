@@ -16,7 +16,7 @@ class AnemometerRepository {
     if (_client != null) return _client!;
 
     final channel = ClientChannel(
-      '176.109.106.237', // IP твоего устройства или сервера
+      '127.0.0.1', // IP твоего устройства или сервера
       port: 50051,
       options: const ChannelOptions(
         credentials: ChannelCredentials.insecure(), // Для локалки без SSL
