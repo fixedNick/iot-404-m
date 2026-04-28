@@ -33,3 +33,12 @@ tasks:
     cmds:
       - rm -rf {{.GO_OUT}}/*
       - rm -rf {{.DART_OUT}}/*
+  docker-up-dev:
+    desc: Start docker containers
+    cmds:
+      - docker compose --env-file env/dev/.env.db --env-file env/dev/.env.go.app up {{.CLI_ARGS}}
+  docker-up-prod:
+    desc: Start docker containers
+    cmds:
+      - docker compose --env-file env/prod/.env.db --env-file env/prod/.env.go.app up {{.CLI_ARGS}}
+  

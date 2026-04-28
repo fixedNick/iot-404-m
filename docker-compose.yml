@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mqtt:
     image: eclipse-mosquitto:latest
@@ -7,7 +5,6 @@ services:
     restart: always
     ports:
       - "1883:1883"   # Основной порт для ESP и Go
-      - "9001:9001"   # Порт для WebSockets (если понадобится для Web-UI)
     volumes:
       - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mqtt-data:/mosquitto/data
@@ -20,25 +17,35 @@ services:
     ports:
       - "${GRPC_PORT}:${GRPC_PORT}"                 # снаружи:внутри, если ваш сервер слушает 8080
     depends_on:
-      - mqtt                         # запускать только после старта mqtt
+      db:
+        condition: service_healthy  
+      mqtt:
+        condition: service_started
     env_file:
-      - env/.env.go.app
-      - env/.env.db
+      - path: ./env/.env.go.app
+      - path: ./env/.env.db
   
   db:
     image: mysql:8.0
-    container_name: ${MYSQL_CONTAINER_NAME}
+    container_name: ${MYSQL_HOST}
     restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql/init.sql:docker-entrypoint-initdb.d/init.sql
+      - ./mysql/mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
-      - env/.env.db
+      - path: ./env/.env.db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   mqtt-data:

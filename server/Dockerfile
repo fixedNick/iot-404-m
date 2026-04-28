@@ -7,6 +7,5 @@ RUN go build -o main main.go
 FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY --from=builder /app/config ./config
 EXPOSE 50051
 CMD ["./main"]

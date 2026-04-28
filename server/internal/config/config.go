@@ -77,6 +77,10 @@ func MustLoadConfig() *Config {
 	if cfg.MySQL.Password == "" {
 		panic("Required env MYSQL_PASSWORD is not set")
 	}
+	cfg.MySQL.Port, err = strconv.Atoi(os.Getenv("MYSQL_PORT"))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse env CACHE_SIZE: %v", err))
+	}
 
 	// mqtt
 

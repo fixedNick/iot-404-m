@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	dbmodels "server/internal/storage/models"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // TODO:
@@ -37,7 +39,7 @@ func InitDB(dsn string) (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-
+	log.Println("MySQL Connected")
 	return db, nil
 }
 func NewMysqlRepository(db *sql.DB) *MysqlRepository {
