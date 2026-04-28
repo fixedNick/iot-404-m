@@ -63,7 +63,6 @@ void reconnect() {
   while (!client.connected()) {
     if (client.connect("ESP8266_Client")) {
       client.subscribe("sensors/control");
-      client.publish("test/t", "esp subscribed to sensors/control");
     } else {
       delay(5000);
     }
@@ -75,12 +74,6 @@ bool heartBeat = false;
 void loop() {
   if (!client.connected()) reconnect();
   client.loop();
-
-  unsigned long now = millis();
-  if ( heartBeat && (now - lastMsg > 10000) ) {
-    lastMsg = now;
-    client.publish("test/t", "{\"msg\":\"heartbeat\"}");
-  }
 
  if (arduinoSerial.available()) {
   String input = arduinoSerial.readStringUntil('\n');
@@ -114,13 +107,12 @@ void loop() {
       }
 
       if (knownSensor) {
-        // todo
-        // publish, чтобы увидеть куда публикуется
         char buffer[256];
         serializeJson(rdoc, buffer);
         client.publish(sPath, buffer);
       }
     } else {
+      // todo: sensors/errors
       // Если ошибка парсинга, пишем в отладку саму строку
       // String errMsg = "JSON Err: " + input;
       // client.publish("test/t", errMsg.c_str());

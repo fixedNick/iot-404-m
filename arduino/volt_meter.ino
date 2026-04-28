@@ -2,10 +2,14 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include "DHT.h"
+
+DHT dht(DHTPIN, DHT11);
 
 #define INPUT_VOLTAGE_PIN A0
 #define INPUT_TEMP_PIN A1
 #define INPUT_HUMIDITY_PIN 2
+
 #define SPEED_MLT 21.375
 
 #define ARDUINO_GSM_RX_PIN 3
@@ -24,7 +28,7 @@ void setup() {
   espSerial.begin(9600);
   // espSerial.listen();
   // gsmSerial.begin(9600);
-
+  dht.begin();
   pinMode(INPUT_VOLTAGE_PIN, INPUT);
   //setupDisplay();
 }
@@ -60,13 +64,21 @@ void loop() {
               sendResponse(espSerial, doc);
             } 
             else if (strcmp(sensor, "humidity") == 0) {
-                doc["humidity"] = -404.404;
+                doc["humidity"] = getHumidity();
                 sendResponse(espSerial, doc);
             }
         }
       }
     }
   }
+}
+
+float getHumidity() {
+  float h = dht.readHumidity();
+  if (isnan(h)) {
+    return 0.0;
+  }
+  return h;
 }
 
 void sendResponse(SoftwareSerial to, StaticJsonDocument<200> resp) {
