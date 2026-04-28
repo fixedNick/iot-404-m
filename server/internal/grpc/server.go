@@ -54,7 +54,8 @@ func (gs *GRPCServer) Stop() {
 func (gs *GRPCServer) WindSpeed(context.Context, *pb.WindSpeedRequest) (*pb.WindSpeedResponse, error) {
 	fmt.Println("GRPCServer: API.WindSpeed() called")
 
-	ctx, _ := context.WithTimeout(context.Background(), gs.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), gs.timeout)
+	defer cancel()
 	wind, err := gs.shead.GetWindSpeed(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
