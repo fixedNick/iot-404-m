@@ -22,8 +22,8 @@ services:
       mqtt:
         condition: service_started
     env_file:
-      - path: ./env/.env.go.app
-      - path: ./env/.env.db
+      - path: ./env/prod/.env.go.app
+      - path: ./env/prod/.env.db
   
   db:
     image: mysql:8.0
@@ -40,7 +40,7 @@ services:
       - ./mysql/mysql_data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
-      - path: ./env/.env.db
+      - path: ./env/prod/.env.db
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
