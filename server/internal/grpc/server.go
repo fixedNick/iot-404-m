@@ -58,8 +58,6 @@ func (gs *GRPCServer) Stop() {
 	gs.server.GracefulStop()
 }
 func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (*pb.WindSpeedResponse, error) {
-	fmt.Println("GRPCServer: API.WindSpeed() called")
-
 	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
 	wind, err := gs.shead.GetWindSpeed(ctx)
@@ -73,11 +71,29 @@ func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (
 	}, nil
 }
 
-func (gs *GRPCServer) Temperature(context.Context, *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Humidity not implemented")
+func (gs *GRPCServer) Temperature(ctx context.Context, req *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
+	defer cancel()
+	temp, err := gs.shead.GetTemperature(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
+	}
+	return &pb.TemperatureResponse{
+		Temperature: temp.Temperature,
+		Time:        temp.Time,
+	}, nil
 }
-func (gs *GRPCServer) Humidity(context.Context, *pb.HumidityRequest) (*pb.HumidityResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Humidity not implemented")
+func (gs *GRPCServer) Humidity(ctx context.Context, req *pb.HumidityRequest) (*pb.HumidityResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
+	defer cancel()
+	humidity, err := gs.shead.GetHumidity(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
+	}
+	return &pb.HumidityResponse{
+		Humidity: humidity.Humidity,
+		Time:     humidity.Time,
+	}, nil
 }
 func (gs *GRPCServer) AutoCollect(context.Context, *pb.AutoCollectRequest) (*pb.AutoCollectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AutoCollect not implemented")
