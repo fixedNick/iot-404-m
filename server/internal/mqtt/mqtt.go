@@ -30,7 +30,7 @@ type MQTTClient struct {
 
 func (m *MQTTClient) GetWind(ctx context.Context) (Wind, error) {
 	_json := `{"cmd": "GET", "sensor": "wind"}`
-	m.Publish("sensors/control", QoS_HIGH, true, []byte(_json))
+	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
 	select {
 	case <-ctx.Done():
 		return Wind{}, ctx.Err()
@@ -40,7 +40,7 @@ func (m *MQTTClient) GetWind(ctx context.Context) (Wind, error) {
 }
 func (m *MQTTClient) GetTemperature(ctx context.Context) (Temperature, error) {
 	_json := `{"cmd": "GET", "sensor": "temperature"}`
-	m.Publish("sensors/control", QoS_HIGH, true, []byte(_json))
+	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
 	select {
 	case <-ctx.Done():
 		return Temperature{}, ctx.Err()
@@ -50,7 +50,7 @@ func (m *MQTTClient) GetTemperature(ctx context.Context) (Temperature, error) {
 }
 func (m *MQTTClient) GetHumidity(ctx context.Context) (Humidity, error) {
 	_json := `{"cmd": "GET", "sensor": "humidity"}`
-	m.Publish("sensors/control", QoS_HIGH, true, []byte(_json))
+	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
 	select {
 	case <-ctx.Done():
 		return Humidity{}, ctx.Err()
@@ -65,7 +65,7 @@ type MQTTCredentials struct {
 }
 
 func NewMQTTClient(host string, port int, cid string, creds *MQTTCredentials) *MQTTClient {
-	return &MQTTClient{
+	c := &MQTTClient{
 		host:     host,
 		port:     port,
 		clientID: cid,
@@ -74,9 +74,7 @@ func NewMQTTClient(host string, port int, cid string, creds *MQTTCredentials) *M
 		temp:     make(chan Temperature),
 		humidity: make(chan Humidity),
 	}
-}
 
-func (c *MQTTClient) Run() {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("%s:%d", c.host, c.port))
 	opts.SetClientID(c.clientID)
@@ -99,6 +97,8 @@ func (c *MQTTClient) Run() {
 		fmt.Printf("Connection error: %s\n", token.Error())
 		os.Exit(1)
 	}
+
+	return c
 }
 
 func (c *MQTTClient) Close() {
