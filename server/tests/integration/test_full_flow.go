@@ -59,11 +59,9 @@ func Test_FullFlow_WindGet() {
 
 type ESPEmulator struct {
 	mqttClient *mqtt.MQTTClient
-	Published  chan mqtt.Wind
 }
 
 func (e *ESPEmulator) InitWind(mqttCfg *cfg.MQTTConfig) {
-	e.Published = make(chan mqtt.Wind, 1024)
 	e.mqttClient = mqtt.NewMQTTClient(mqttCfg.Host, mqttCfg.Port, fmt.Sprintf("go-test-%d", time.Now().Unix()), nil)
 
 	e.mqttClient.Subscribe("sensors/control", mqtt.QoS_HIGH, func(client vmqtt.Client, msg vmqtt.Message) {
@@ -78,17 +76,42 @@ func (e *ESPEmulator) InitWind(mqttCfg *cfg.MQTTConfig) {
 		if err != nil {
 			panic(err)
 		}
-		w := mqtt.Wind{
-			Voltage: (rand.Float32() * 10) + 5,
-			Speed:   (rand.Float32() * 30) + 8,
-		}
+		if cmd.Sensor == "wind" {
+			w := mqtt.Wind{
+				Voltage: (rand.Float32() * 10) + 5,
+				Speed:   (rand.Float32() * 30) + 8,
+			}
 
-		bytes, err := json.Marshal(w)
-		if err != nil {
-			panic(err)
-		}
+			bytes, err := json.Marshal(w)
+			if err != nil {
+				panic(err)
+			}
 
-		e.mqttClient.Publish("sensors/data/wind", mqtt.QoS_HIGH, false, bytes)
-		e.Published <- w
+			e.mqttClient.Publish("sensors/data/wind", mqtt.QoS_HIGH, false, bytes)
+		}
+		if cmd.Sensor == "temperature" {
+			w := mqtt.Temperature{
+				Temperature: (rand.Float32() * 10) + 5,
+			}
+
+			bytes, err := json.Marshal(w)
+			if err != nil {
+				panic(err)
+			}
+
+			e.mqttClient.Publish("sensors/data/temperature", mqtt.QoS_HIGH, false, bytes)
+		}
+		if cmd.Sensor == "humidity" {
+			w := mqtt.Humidity{
+				Humidity: (rand.Float32() * 10) + 5,
+			}
+
+			bytes, err := json.Marshal(w)
+			if err != nil {
+				panic(err)
+			}
+
+			e.mqttClient.Publish("sensors/data/humidity", mqtt.QoS_HIGH, false, bytes)
+		}
 	})
 }

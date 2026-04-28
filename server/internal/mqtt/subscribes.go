@@ -28,7 +28,7 @@ func SuscribeTemperature(m *MQTTClient) {
 	m.Subscribe("sensors/data/temperature", QoS_HIGH, func(client mqtt.Client, msg mqtt.Message) {
 		t := Temperature{}
 		json.Unmarshal(msg.Payload(), &t)
-		fmt.Printf("Callback: sensors/data/wind. Recv: %v.\n", t)
+		fmt.Printf("Callback: sensors/data/temperature. Recv: %v.\n", t)
 		m.temp <- t
 	})
 }
@@ -37,7 +37,7 @@ func SuscribeHumidity(m *MQTTClient) {
 	m.Subscribe("sensors/data/humidity", QoS_HIGH, func(client mqtt.Client, msg mqtt.Message) {
 		h := Humidity{}
 		json.Unmarshal(msg.Payload(), &h)
-		fmt.Printf("Callback: sensors/data/wind. Recv: %v.\n", h)
+		fmt.Printf("Callback: sensors/data/humidity. Recv: %v.\n", h)
 		m.humidity <- h
 	})
 }
