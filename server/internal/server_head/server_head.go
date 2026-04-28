@@ -23,7 +23,9 @@ func (s *ServerHead) GetWindSpeed(ctx context.Context) (dbmodels.WindSpeed, erro
 		return dbmodels.WindSpeed{}, err
 	}
 	dbWind := wind.ToSQLModel(time.Now())
-	if err = s.storage.SaveWind(context.Background(), dbWind); err != nil {
+	saveCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err = s.storage.SaveWind(saveCtx, dbWind); err != nil {
 		return dbmodels.WindSpeed{}, err
 	}
 
@@ -35,7 +37,9 @@ func (s *ServerHead) GetTemperature(ctx context.Context) (dbmodels.Temperature, 
 		return dbmodels.Temperature{}, err
 	}
 	dbTemp := temp.ToSQLModel(time.Now())
-	if err = s.storage.SaveTemperature(context.Background(), dbTemp); err != nil {
+	saveCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err = s.storage.SaveTemperature(saveCtx, dbTemp); err != nil {
 		return dbmodels.Temperature{}, err
 	}
 
@@ -47,7 +51,9 @@ func (s *ServerHead) GetHumidity(ctx context.Context) (dbmodels.Humidity, error)
 		return dbmodels.Humidity{}, err
 	}
 	dbHumidity := humidity.ToSQLModel(time.Now())
-	if err = s.storage.SaveHumidity(context.Background(), dbHumidity); err != nil {
+	saveCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err = s.storage.SaveHumidity(saveCtx, dbHumidity); err != nil {
 		return dbmodels.Humidity{}, err
 	}
 
