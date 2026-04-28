@@ -32,6 +32,13 @@ func NewGRPCServer(cfg *cfg.Config, shead *serverhead.ServerHead) *GRPCServer {
 }
 
 func (gs *GRPCServer) Run() {
+	syncChan := make(chan struct{})
+	go gs.run(syncChan)
+	<-syncChan
+	fmt.Println("GRPC Server ready for connections")
+}
+
+func (gs *GRPCServer) run(syncChan chan struct{}) {
 	s := grpc.NewServer()
 	gs.server = s
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.port))
@@ -41,8 +48,7 @@ func (gs *GRPCServer) Run() {
 
 	pb.RegisterESP8266ServiceServer(s, gs)
 
-	fmt.Println("GRPC Server ready for connections")
-
+	close(syncChan)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
