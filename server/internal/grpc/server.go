@@ -51,10 +51,10 @@ func (gs *GRPCServer) Run() {
 func (gs *GRPCServer) Stop() {
 	gs.server.GracefulStop()
 }
-func (gs *GRPCServer) WindSpeed(context.Context, *pb.WindSpeedRequest) (*pb.WindSpeedResponse, error) {
+func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (*pb.WindSpeedResponse, error) {
 	fmt.Println("GRPCServer: API.WindSpeed() called")
 
-	ctx, cancel := context.WithTimeout(context.Background(), gs.timeout)
+	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
 	wind, err := gs.shead.GetWindSpeed(ctx)
 	if err != nil {
