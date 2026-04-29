@@ -36,17 +36,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   strncpy(topCopy, topic, sizeof(topCopy) - 1);
   topCopy[sizeof(topCopy) - 1] = '\0';
 
-  char message[length + 1];
-  memcpy(message, payload, length);
-  message[length] = '\0'; 
-
-  byte buffalo[length + 1];
-  memcpy(buffalo, payload, length);
-  buffalo[length] = '\0'; 
+  byte buf[length + 1];
+  memcpy(buf, payload, length);
+  buf[length] = '\0'; 
 
   if (strcmp(topCopy, "sensors/control") == 0) {
     StaticJsonDocument<200> doc;
-    deserializeJson(doc, buffalo, length);
+    deserializeJson(doc, buf, length);
 
     if (doc["cmd"] == "GET") {
       if (doc["sensor"] == "wind" || doc["sensor"] == "temperature" || doc["sensor"] == "humidity") {
@@ -95,14 +91,17 @@ void loop() {
         sPath = "sensors/data/wind";
         rdoc["voltage"] = doc["voltage"];
         rdoc["speed"] = doc["speed"];
+        rdoc["request_id"] = doc["request_id"];
         knownSensor = true;
       } else if (doc["sensor"] == "temperature") {
         sPath = "sensors/data/temperature";
         rdoc["temperature"] = doc["temperature"];
+        rdoc["request_id"] = doc["request_id"];
         knownSensor = true;
       } else if (doc["sensor"] == "humidity") {
         sPath = "sensors/data/humidity";
         rdoc["humidity"] = doc["humidity"];
+        rdoc["request_id"] = doc["request_id"];
         knownSensor = true;
       }
 
