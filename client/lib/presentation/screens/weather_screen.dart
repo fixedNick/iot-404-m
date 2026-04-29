@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import '../../data/repository/wind_repository.dart';
 import '../../data/repository/temp_repository.dart';
@@ -75,36 +76,200 @@ class _WeatherScreenState extends State<WeatherScreen> {
     }
   }
 
-  Widget metricCard({
-    required IconData icon,
-    required String value,
-    required Color color,
-  }) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/bg.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(.25),
+                  Colors.black.withOpacity(.65),
+                ],
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  /// top bar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Дивноморское",
+                        style: TextStyle(
+                          fontFamily: "AppleSanFrancisco",
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      _glassIcon(Icons.settings, () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const AutoCollectSheet(),
+                        );
+                      }),
+                    ],
+                  ),
+
+                  /// hero temp
+                  Text(
+                    temp == null
+                        ? "22"
+                        : "${temp!.temperature.toStringAsFixed(1)}°",
+                    style: const TextStyle(
+                      fontFamily: "AppleSanFrancisco",
+                      fontSize: 72,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  Row(
+                    children: [
+                      sensorCard(
+                        Icons.air,
+                        wind == null ? "--" : wind!.speed.toStringAsFixed(1),
+                        Colors.cyanAccent,
+                      ),
+
+                      sensorCard(
+                        Icons.thermostat,
+                        temp == null
+                            ? "--"
+                            : "${temp!.temperature.toStringAsFixed(1)}°",
+                        Colors.orangeAccent,
+                      ),
+
+                      sensorCard(
+                        Icons.water_drop,
+                        humidity == null
+                            ? "--"
+                            : "${humidity!.humidity.toStringAsFixed(0)}%",
+                        Colors.blueAccent,
+                      ),
+                    ],
+                  ),
+
+                  const Spacer(),
+
+                  _glassIcon(
+                    Icons.refresh,
+                    refreshData,
+                    loading: loading,
+                    size: 70,
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  /// statistics button
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        isScrollControlled: true,
+                        builder: (_) => const StatsSheet(),
+                      );
+                    },
+
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 16,
+                      ),
+
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+
+                        color: Colors.white.withOpacity(.14),
+
+                        border: Border.all(color: Colors.white24),
+                      ),
+
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.show_chart, color: Colors.white),
+
+                          SizedBox(width: 12),
+
+                          Text(
+                            "Статистика",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget sensorCard(IconData icon, String value, Color color) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 7),
-        padding: const EdgeInsets.symmetric(vertical: 26),
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+
+        padding: const EdgeInsets.symmetric(vertical: 30),
+
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.14),
-          borderRadius: BorderRadius.circular(26),
+          color: Colors.white.withOpacity(.13),
+
+          borderRadius: BorderRadius.circular(30),
+
           border: Border.all(color: Colors.white24),
-          boxShadow: [
-            BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(.10)),
-          ],
         ),
+
         child: Column(
           children: [
-            Icon(icon, size: 40, color: color),
+            Icon(icon, size: 25, color: color),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
 
             Text(
               value,
               style: const TextStyle(
-                fontFamily: 'AppleSanFrancisco',
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
                 color: Colors.white,
+                fontFamily: "AppleSanFrancisco",
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
@@ -113,129 +278,225 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
+  Widget _glassIcon(
+    IconData icon,
+    VoidCallback onTap, {
+    bool loading = false,
+    double size = 58,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(.15),
+          border: Border.all(color: Colors.white24),
+        ),
+
+        child: Center(
+          child: loading
+              ? const CircularProgressIndicator()
+              : Icon(icon, color: Colors.white, size: 30),
+        ),
+      ),
+    );
+  }
+}
+
+class AutoCollectSheet extends StatefulWidget {
+  const AutoCollectSheet({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+  State<AutoCollectSheet> createState() => _AutoCollectSheetState();
+}
+
+class _AutoCollectSheetState extends State<AutoCollectSheet> {
+  String sensor = 'temperature';
+
+  bool infinite = false;
+
+  final durationController = TextEditingController();
+
+  final periodController = TextEditingController(text: "1000");
+
+  @override
+  Widget build(context) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 25,
+        right: 25,
+        top: 30,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 30,
+      ),
+
+      decoration: BoxDecoration(
+        color: Color(0xff1b1f29),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
+      ),
+
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          /// background
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bg.jpg'),
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+          Text(
+            "Авто сбор",
+            style: TextStyle(color: Colors.white, fontSize: 28),
+          ),
+
+          SizedBox(height: 25),
+
+          DropdownButtonFormField(
+            style: TextStyle(color: Colors.white),
+            dropdownColor: const Color.fromARGB(255, 29, 29, 29),
+            initialValue: sensor,
+            focusColor: Colors.white,
+            items: [
+              DropdownMenuItem(value: "wind", child: Text("Ветер")),
+
+              DropdownMenuItem(
+                value: "temperature",
+                child: Text("Температура"),
               ),
+
+              DropdownMenuItem(value: "humidity", child: Text("Влажность")),
+            ],
+            onChanged: (v) {
+              setState(() => sensor = v!);
+            },
+          ),
+
+          SizedBox(height: 20),
+
+          TextField(
+            style: TextStyle(color: Colors.white),
+            controller: durationController,
+            enabled: !infinite,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: "Продолжительность",
+              labelStyle: TextStyle(color: Colors.white),
+              floatingLabelStyle: TextStyle(color: Colors.blue.shade100),
             ),
           ),
 
-          /// overlay
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.black26, Colors.black45],
+          Row(
+            children: [
+              Checkbox(
+                value: infinite,
+                onChanged: (v) {
+                  setState(() => infinite = v!);
+                },
               ),
+
+              Icon(Icons.all_inclusive, color: Colors.white),
+
+              SizedBox(width: 10),
+
+              Text("Бесконечно", style: TextStyle(color: Colors.white)),
+            ],
+          ),
+
+          SizedBox(height: 20),
+
+          TextField(
+            controller: periodController,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: Colors.white),
+
+            decoration: InputDecoration(
+              labelText: "Периодичность",
+              hintStyle: TextStyle(color: Colors.white),
+              labelStyle: TextStyle(color: Colors.white),
+              floatingLabelStyle: TextStyle(color: Colors.blue.shade100),
             ),
           ),
 
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 42),
+          SizedBox(height: 30),
 
-                  Row(
-                    children: [
-                      metricCard(
-                        icon: Icons.air,
-                        value: wind == null
-                            ? '--'
-                            : '${wind!.speed.toStringAsFixed(1)}',
-                        color: Colors.cyanAccent,
-                      ),
+          ElevatedButton.icon(
+            icon: Icon(Icons.play_arrow),
 
-                      metricCard(
-                        icon: Icons.thermostat,
-                        value: temp == null
-                            ? '--'
-                            : '${temp!.temperature.toStringAsFixed(1)}°',
-                        color: Colors.orangeAccent,
-                      ),
+            label: Text("Запустить"),
 
-                      metricCard(
-                        icon: Icons.water_drop,
-                        value: humidity == null
-                            ? '--'
-                            : '${humidity!.humidity.toStringAsFixed(0)}%',
-                        color: Colors.lightBlueAccent,
-                      ),
+            onPressed: () {
+              final period = int.tryParse(periodController.text) ?? 1000;
+
+              if (period < 1000) {
+                return;
+              }
+
+              final duration = infinite
+                  ? 0
+                  : int.tryParse(durationController.text) ?? 0;
+
+              /// grpc
+              /*
+      grpc.startAutoCollection(
+        sensor:sensor,
+        duration:duration,
+        period:period,
+      );
+      */
+              /* TODO использовать для запуска авто
+await grpc.startAutoCollection(...);
+
+widget.onRefresh?.call();
+
+Navigator.pop(context);
+      */
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatsSheet extends StatelessWidget {
+  const StatsSheet({super.key});
+
+  @override
+  Widget build(context) {
+    return Container(
+      height: 400,
+
+      decoration: BoxDecoration(
+        color: Color(0xff171c25),
+
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+
+      child: Column(
+        children: [
+          SizedBox(height: 25),
+
+          Text(
+            "Температура",
+            style: TextStyle(color: Colors.white, fontSize: 24),
+          ),
+
+          SizedBox(height: 20),
+
+          SizedBox(
+            height: 300,
+            child: LineChart(
+              LineChartData(
+                lineBarsData: [
+                  LineChartBarData(
+                    isCurved: true,
+
+                    spots: [
+                      FlSpot(1, 18),
+                      FlSpot(2, 21),
+                      FlSpot(3, 20),
+                      FlSpot(4, 24),
+                      FlSpot(5, 22),
+                      FlSpot(6, 25),
                     ],
                   ),
-
-                  const Spacer(),
-
-                  /// refresh button
-                  Center(
-                    child: SizedBox(
-                      width: 52,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: loading ? null : refreshData,
-
-                        style: ElevatedButton.styleFrom(
-                          shape: const CircleBorder(),
-                          backgroundColor: Colors.white.withAlpha(55),
-                          foregroundColor: Colors.green.shade400,
-                          padding: EdgeInsets.zero,
-                          elevation: 10,
-                        ),
-
-                        child: loading
-                            ? const SizedBox(
-                                width: 28,
-                                height: 28,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                ),
-                              )
-                            : const Icon(Icons.refresh, size: 38),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  /// smaller statistics button
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * .72,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        /// navigation later
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade700,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-
-                      child: const Text(
-                        'Статистика',
-                        style: TextStyle(
-                          fontFamily: 'AppleSanFrancisco',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 19,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
                 ],
               ),
             ),
