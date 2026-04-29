@@ -78,8 +78,7 @@ func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (
 func (gs *GRPCServer) Temperature(ctx context.Context, req *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
-	// todo: pass context cancel into func and canlcel on value returned
-	temp, err := gs.shead.GetTemperature(ctx)
+	temp, err := gs.shead.GetTemperature(ctx, true)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, status.Error(codes.DeadlineExceeded, "Timeout reached")
@@ -94,7 +93,7 @@ func (gs *GRPCServer) Temperature(ctx context.Context, req *pb.TemperatureReques
 func (gs *GRPCServer) Humidity(ctx context.Context, req *pb.HumidityRequest) (*pb.HumidityResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
-	humidity, err := gs.shead.GetHumidity(ctx)
+	humidity, err := gs.shead.GetHumidity(ctx, true)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, status.Error(codes.DeadlineExceeded, "Timeout reached")
@@ -106,9 +105,17 @@ func (gs *GRPCServer) Humidity(ctx context.Context, req *pb.HumidityRequest) (*p
 		Time:     humidity.Time,
 	}, nil
 }
-func (gs *GRPCServer) AutoCollect(context.Context, *pb.AutoCollectRequest) (*pb.AutoCollectResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method AutoCollect not implemented")
+func (gs *GRPCServer) AutoCollect(ctx context.Context, req *pb.AutoCollectRequest) (*pb.AutoCollectResponse, error) {
+	err := gs.shead.StartAutoCollect(ctx, req.Sensor, int(req.Duration), int(req.Period))
+	if err != nil {
+		return nil, status.Error(codes.Unavailable, fmt.Sprintf("Error: %v", err))
+	}
+	return &pb.AutoCollectResponse{Success: true}, nil
 }
-func (gs *GRPCServer) StopAutoCollect(context.Context, *pb.StopAutoCollectRequest) (*pb.StopAutoCollectResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method StopAutoCollect not implemented")
+func (gs *GRPCServer) StopAutoCollect(ctx context.Context, req *pb.StopAutoCollectRequest) (*pb.StopAutoCollectResponse, error) {
+	err := gs.shead.StopAutoCollect(req.Sensor)
+	if err != nil {
+		return nil, status.Error(codes.Unavailable, fmt.Sprintf("Error: %v", err))
+	}
+	return &pb.StopAutoCollectResponse{Success: true}, nil
 }
