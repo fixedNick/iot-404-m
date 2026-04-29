@@ -1,0 +1,52 @@
+services:
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    restart: always
+    ports:
+      - "1883:1883"   # Основной порт для ESP и Go
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+
+  go-server:
+    build: ./server                  # путь к Dockerfile
+    container_name: go-server
+    restart: always
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"                 # снаружи:внутри, если ваш сервер слушает 8080
+    depends_on:
+      db:
+        condition: service_healthy  
+      mqtt:
+        condition: service_started
+    env_file:
+      - path: ./env/dev/.env.go.app
+      - path: ./env/dev/.env.db
+  
+  db:
+    image: mysql:8.0
+    container_name: ${MYSQL_HOST}
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ./mysql/mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - path: ./env/dev/.env.db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mqtt-data:
+  mqtt-log:

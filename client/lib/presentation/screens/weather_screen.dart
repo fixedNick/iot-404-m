@@ -49,14 +49,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
     });
 
     try {
-      final w = await windRepo.fetchWind();
-      final t = await tempRepo.fetchTemp();
-      final h = await humidityRepo.fetchHumidity();
+      final results = await Future.wait([
+        windRepo.fetchWind(),
+        tempRepo.fetchTemp(),
+        humidityRepo.fetchHumidity(),
+      ]);
+
+      final w = results[0];
+      final t = results[1];
+      final h = results[2];
 
       setState(() {
-        wind = w;
-        temp = t;
-        humidity = h;
+        wind = w as WindReading;
+        temp = t as TempReading;
+        humidity = h as HumidityReading;
       });
     } catch (e) {
       debugPrint("GRPC error: $e");

@@ -6,16 +6,19 @@ import (
 )
 
 type Wind struct {
-	Voltage float32 `json:"voltage"`
-	Speed   float32 `json:"speed"`
+	Voltage   float32 `json:"voltage"`
+	Speed     float32 `json:"speed"`
+	RequestId uint64  `json:"request_id"`
 }
 
 type Humidity struct {
-	Humidity float32 `json:"humidity"`
+	Humidity  float32 `json:"humidity"`
+	RequestId uint64  `json:"request_id"`
 }
 
 type Temperature struct {
 	Temperature float32 `json:"temperature"`
+	RequestId   uint64  `json:"request_id"`
 }
 
 func (w Wind) ToSQLModel(t time.Time) dbmodels.WindSpeed {

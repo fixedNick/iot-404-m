@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -26,19 +27,19 @@ type GRPCServer struct {
 func NewGRPCServer(cfg *cfg.Config, shead *serverhead.ServerHead) *GRPCServer {
 	return &GRPCServer{
 		port:    cfg.GRPC.Port,
-		timeout: time.Duration(cfg.GRPC.Timeout * uint(time.Millisecond)),
+		timeout: time.Duration(cfg.GRPC.Timeout) * time.Millisecond,
 		shead:   shead,
 	}
 }
 
 func (gs *GRPCServer) Run() {
-	syncChan := make(chan struct{})
-	go gs.run(syncChan)
-	<-syncChan
+	startSyncChan := make(chan struct{})
+	go gs.run(startSyncChan)
+	<-startSyncChan
 	fmt.Println("GRPC Server ready for connections")
 }
 
-func (gs *GRPCServer) run(syncChan chan struct{}) {
+func (gs *GRPCServer) run(startSyncChan chan struct{}) {
 	s := grpc.NewServer()
 	gs.server = s
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.port))
@@ -48,7 +49,7 @@ func (gs *GRPCServer) run(syncChan chan struct{}) {
 
 	pb.RegisterESP8266ServiceServer(s, gs)
 
-	close(syncChan)
+	close(startSyncChan)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
@@ -60,8 +61,11 @@ func (gs *GRPCServer) Stop() {
 func (gs *GRPCServer) WindSpeed(ctx context.Context, req *pb.WindSpeedRequest) (*pb.WindSpeedResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, gs.timeout)
 	defer cancel()
-	wind, err := gs.shead.GetWindSpeed(ctx)
+	wind, err := gs.shead.GetWindSpeed(ctx, true)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, status.Error(codes.DeadlineExceeded, "Timeout reached")
+		}
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
 	}
 	return &pb.WindSpeedResponse{
@@ -77,6 +81,9 @@ func (gs *GRPCServer) Temperature(ctx context.Context, req *pb.TemperatureReques
 	// todo: pass context cancel into func and canlcel on value returned
 	temp, err := gs.shead.GetTemperature(ctx)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, status.Error(codes.DeadlineExceeded, "Timeout reached")
+		}
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
 	}
 	return &pb.TemperatureResponse{
@@ -89,6 +96,9 @@ func (gs *GRPCServer) Humidity(ctx context.Context, req *pb.HumidityRequest) (*p
 	defer cancel()
 	humidity, err := gs.shead.GetHumidity(ctx)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, status.Error(codes.DeadlineExceeded, "Timeout reached")
+		}
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("Error: %v", err))
 	}
 	return &pb.HumidityResponse{

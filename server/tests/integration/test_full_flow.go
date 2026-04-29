@@ -25,7 +25,7 @@ func RunDependencies(config *cfg.Config) (*mqtt.MQTTClient, *grpc.GRPCServer, *d
 	serverHead := serverhead.New(mqttClient, storage)
 
 	gs := grpc.NewGRPCServer(config, serverHead)
-	mqttClient.SetupSubsribes(
+	go mqttClient.SetupSubsribes(
 		mqtt.SuscribeHumidity,
 		mqtt.SuscribeTemperature,
 		mqtt.SuscribeWindSpeed,

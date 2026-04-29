@@ -3,10 +3,11 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	cfg "server/internal/config"
 	dbmodels "server/internal/storage/models"
 	"server/internal/storage/repository"
+
+	"github.com/rs/zerolog/log"
 )
 
 type SensorStorage struct {
@@ -21,7 +22,7 @@ func New(config *cfg.Config) *SensorStorage {
 
 	sql, err := repository.InitDB(config.MySQL.DSN())
 	if err != nil {
-		log.Fatalf("Error on init-db: %v", err)
+		log.Error().Str("error", err.Error()).Msg("[StorageSensor.New.InitDB error]")
 	}
 
 	sqlRepo := repository.NewMysqlRepository(sql)
@@ -29,6 +30,27 @@ func New(config *cfg.Config) *SensorStorage {
 	windCache := repository.New[dbmodels.WindSpeed](config.Repository.CacheSize)
 	tempCache := repository.New[dbmodels.Temperature](config.Repository.CacheSize)
 	humidityCache := repository.New[dbmodels.Humidity](config.Repository.CacheSize)
+
+	// fill cache from database
+	if ts, err := sqlRepo.GetTemperature(context.Background(), int(config.Repository.CacheSize)); err == nil {
+		for _, t := range ts {
+			tempCache.Add(t)
+		}
+	}
+	if hs, err := sqlRepo.GetHumidity(context.Background(), int(config.Repository.CacheSize)); err == nil {
+		for _, h := range hs {
+			humidityCache.Add(h)
+		}
+	}
+	if ws, err := sqlRepo.GetWindSpeed(context.Background(), int(config.Repository.CacheSize)); err == nil {
+		for _, w := range ws {
+			windCache.Add(w)
+		}
+	}
+
+	log.Info().
+		Str("cache-size", fmt.Sprintf("Temp: %d | Humidity: %d | Wind: %d", tempCache.Size(), humidityCache.Size(), windCache.Size())).
+		Msg("[onload.storage.SensorStorage] LocalCache loaded from database")
 
 	return &SensorStorage{
 		sqlRepo:          sqlRepo,
@@ -105,10 +127,15 @@ func (s *SensorStorage) GetLastWind(ctx context.Context) (dbmodels.WindSpeed, er
 	if w, err := s.windCache.GetLast(); err == nil {
 		return w, nil
 	}
+
+	if ctx.Err() != nil {
+		return dbmodels.WindSpeed{}, ctx.Err()
+	}
+
 	w, err := s.sqlRepo.GetWindSpeed(ctx, 1)
 	if err != nil {
-		log.Printf("SensorStorage.GetLastWind => SQL: %v", err)
-		return dbmodels.WindSpeed{}, fmt.Errorf("Database is empty")
+		log.Info().AnErr("error", err).Msg("[SensorStorage.GetLastWind -> SQL]")
+		return dbmodels.WindSpeed{}, err
 	}
 	return w[0], nil
 }
@@ -120,7 +147,7 @@ func (s *SensorStorage) GetLastTemperature(ctx context.Context) (dbmodels.Temper
 	}
 	t, err := s.sqlRepo.GetTemperature(ctx, 1)
 	if err != nil {
-		log.Printf("SensorStorage.GetLastTemperature => SQL: %v", err)
+		log.Info().AnErr("error", err).Msg("[SensorStorage.GetLastTemperature -> SQL]")
 		return dbmodels.Temperature{}, fmt.Errorf("Database is empty")
 	}
 	return t[0], nil
@@ -133,7 +160,7 @@ func (s *SensorStorage) GetLastHumidity(ctx context.Context) (dbmodels.Humidity,
 	}
 	h, err := s.sqlRepo.GetHumidity(ctx, 1)
 	if err != nil {
-		log.Printf("SensorStorage.GetLastHumidity => SQL: %v", err)
+		log.Info().AnErr("error", err).Msg("[SensorStorage.GetLastHumidity -> SQL]")
 		return dbmodels.Humidity{}, fmt.Errorf("Database is empty")
 	}
 	return h[0], nil

@@ -48,3 +48,8 @@ func (c *LocalCache[T]) GetLast() (T, error) {
 func (c *LocalCache[T]) MaxSize() int {
 	return c.MaxSize()
 }
+func (c *LocalCache[T]) Size() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.data)
+}

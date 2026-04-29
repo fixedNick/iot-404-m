@@ -4,15 +4,19 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+type QoS byte
+
 const (
-	QoS_LOW  = 0
-	QoS_MID  = 1
-	QoS_HIGH = 2
+	QoS_LOW  QoS = 0
+	QoS_MID  QoS = 1
+	QoS_HIGH QoS = 2
 )
 
 type MQTTClient struct {
@@ -22,39 +26,86 @@ type MQTTClient struct {
 	client   mqtt.Client
 	creds    *MQTTCredentials
 
-	// sync channels
-	wind     chan Wind
-	temp     chan Temperature
-	humidity chan Humidity
+	windRequests     map[uint64]chan Wind
+	tempRequests     map[uint64]chan Temperature
+	humidityRequests map[uint64]chan Humidity
+
+	windMu     sync.RWMutex
+	tempMu     sync.RWMutex
+	humidityMu sync.RWMutex
+
+	rid atomic.Uint64
 }
 
+func (m *MQTTClient) UniqueRequestID() uint64 {
+	return m.rid.Add(1)
+}
 func (m *MQTTClient) GetWind(ctx context.Context) (Wind, error) {
-	_json := `{"cmd": "GET", "sensor": "wind"}`
-	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
+	requestId := m.UniqueRequestID()
+
+	m.windMu.Lock()
+	windCh := make(chan Wind, 1)
+	m.windRequests[requestId] = windCh
+	m.windMu.Unlock()
+
+	defer func(reqId uint64) {
+		m.windMu.Lock()
+		delete(m.windRequests, reqId)
+		m.windMu.Unlock()
+	}(requestId)
+
+	NewRequest("GET", "wind", requestId).Publish(m, TopicControl, QoS_HIGH, false)
+
 	select {
 	case <-ctx.Done():
 		return Wind{}, ctx.Err()
-	case w := <-m.wind:
+	case w := <-windCh:
 		return w, nil
 	}
 }
 func (m *MQTTClient) GetTemperature(ctx context.Context) (Temperature, error) {
-	_json := `{"cmd": "GET", "sensor": "temperature"}`
-	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
+	requestId := m.UniqueRequestID()
+
+	m.tempMu.Lock()
+	tempCh := make(chan Temperature, 1)
+	m.tempRequests[requestId] = tempCh
+	m.tempMu.Unlock()
+
+	defer func(reqId uint64) {
+		m.tempMu.Lock()
+		delete(m.tempRequests, reqId)
+		m.tempMu.Unlock()
+	}(requestId)
+
+	NewRequest("GET", SensorTemperature, requestId).Publish(m, TopicControl, QoS_HIGH, false)
+
 	select {
 	case <-ctx.Done():
 		return Temperature{}, ctx.Err()
-	case t := <-m.temp:
+	case t := <-tempCh:
 		return t, nil
 	}
 }
 func (m *MQTTClient) GetHumidity(ctx context.Context) (Humidity, error) {
-	_json := `{"cmd": "GET", "sensor": "humidity"}`
-	m.Publish("sensors/control", QoS_HIGH, false, []byte(_json))
+	requestId := m.UniqueRequestID()
+
+	m.humidityMu.Lock()
+	humidityChan := make(chan Humidity, 1)
+	m.humidityRequests[requestId] = humidityChan
+	m.humidityMu.Unlock()
+
+	defer func(reqId uint64) {
+		m.humidityMu.Lock()
+		delete(m.humidityRequests, reqId)
+		m.humidityMu.Unlock()
+	}(requestId)
+
+	NewRequest("GET", SensorHumidity, requestId).Publish(m, TopicControl, QoS_HIGH, false)
+
 	select {
 	case <-ctx.Done():
 		return Humidity{}, ctx.Err()
-	case h := <-m.humidity:
+	case h := <-humidityChan:
 		return h, nil
 	}
 }
@@ -70,9 +121,16 @@ func NewMQTTClient(host string, port int, cid string, creds *MQTTCredentials) *M
 		port:     port,
 		clientID: cid,
 		creds:    creds,
-		wind:     make(chan Wind),
-		temp:     make(chan Temperature),
-		humidity: make(chan Humidity),
+
+		windRequests:     make(map[uint64]chan Wind),
+		tempRequests:     make(map[uint64]chan Temperature),
+		humidityRequests: make(map[uint64]chan Humidity),
+
+		rid: atomic.Uint64{},
+
+		windMu:     sync.RWMutex{},
+		tempMu:     sync.RWMutex{},
+		humidityMu: sync.RWMutex{},
 	}
 
 	opts := mqtt.NewClientOptions()
@@ -103,9 +161,6 @@ func NewMQTTClient(host string, port int, cid string, creds *MQTTCredentials) *M
 
 func (c *MQTTClient) Close() {
 	c.client.Disconnect(250)
-	close(c.wind)
-	close(c.humidity)
-	close(c.temp)
 }
 
 func (c *MQTTClient) onConnect(client mqtt.Client) {
@@ -117,8 +172,8 @@ func (c *MQTTClient) onConnectionLost(client mqtt.Client, err error) {
 	fmt.Println("Connection lost...")
 }
 
-func (c *MQTTClient) Publish(topic string, qos byte, retained bool, payload any) {
-	t := c.client.Publish(topic, qos, retained, payload)
+func (c *MQTTClient) Publish(topic string, qos QoS, retained bool, payload any) {
+	t := c.client.Publish(topic, byte(qos), retained, payload)
 	t.Wait()
 	if t.Error() != nil {
 		fmt.Printf("Publish error: %v\n", t.Error())
@@ -127,8 +182,8 @@ func (c *MQTTClient) Publish(topic string, qos byte, retained bool, payload any)
 	fmt.Printf("Publish OK in topic: %s <= [%s]\n", topic, payload)
 }
 
-func (c *MQTTClient) Subscribe(topic string, qos byte, f func(client mqtt.Client, msg mqtt.Message)) {
-	token := c.client.Subscribe(topic, qos, f)
+func (c *MQTTClient) Subscribe(topic Topic, qos QoS, f func(client mqtt.Client, msg mqtt.Message)) {
+	token := c.client.Subscribe(string(topic), byte(qos), f)
 	token.Wait()
 	if token.Error() != nil {
 		fmt.Printf("Subscribe error: %v\n", token.Error())
