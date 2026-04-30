@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../data/repository/wind_repository.dart';
 import '../../data/repository/temp_repository.dart';
 import '../../data/repository/humidity_repository.dart';
+import '../../data/repository/auto_collect_repository.dart';
 
 import '../../data/datasource/wind_remote.dart';
 import '../../data/datasource/temp_remote.dart';
@@ -318,9 +319,28 @@ class _AutoCollectSheetState extends State<AutoCollectSheet> {
 
   bool infinite = false;
 
+  late final AutoCollectRepository autoCollectRepo;
+  bool autoCallStatus = false;
   final durationController = TextEditingController();
 
   final periodController = TextEditingController(text: "1000");
+  Future<void> autoCall(String sensor, int duration, int period) async {
+    var w = await autoCollectRepo.startAutoCollect(
+      sensor: sensor,
+      duration: duration,
+      period: period,
+    );
+    setState(() {
+      autoCallStatus = w.success;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    autoCollectRepo = AutoCollectRepository();
+  }
 
   @override
   Widget build(context) {
@@ -430,6 +450,9 @@ class _AutoCollectSheetState extends State<AutoCollectSheet> {
               final duration = infinite
                   ? 0
                   : int.tryParse(durationController.text) ?? 0;
+
+              autoCall(sensor, duration, period);
+              print("Received status autocall from server: $autoCallStatus");
 
               /// grpc
               /*
