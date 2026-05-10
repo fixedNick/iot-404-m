@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	cfg "server/internal/config"
+	"server/internal/domain/sensors"
 	serverhead "server/internal/server_head"
 	pb "server/pb"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -44,14 +45,14 @@ func (gs *GRPCServer) run(startSyncChan chan struct{}) {
 	gs.server = s
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatal().AnErr("failed to listen", err)
 	}
 
 	pb.RegisterESP8266ServiceServer(s, gs)
 
 	close(startSyncChan)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatal().AnErr("failed to serve", err)
 	}
 }
 
@@ -106,16 +107,26 @@ func (gs *GRPCServer) Humidity(ctx context.Context, req *pb.HumidityRequest) (*p
 	}, nil
 }
 func (gs *GRPCServer) AutoCollect(ctx context.Context, req *pb.AutoCollectRequest) (*pb.AutoCollectResponse, error) {
-	err := gs.shead.StartAutoCollect(ctx, req.Sensor, int(req.Duration), int(req.Period))
+	log.Info().Str("in", "GRPC_API.AutoCollect").Str("sensor", req.Sensor).Uint64("period", req.Period).Uint64("duration", req.Duration).Msg("API Start Auto Collect")
+	err := gs.shead.StartAutoCollect(ctx, sensors.FromString(req.Sensor), int(req.Duration), int(req.Period))
 	if err != nil {
 		return nil, status.Error(codes.Unavailable, fmt.Sprintf("Error: %v", err))
 	}
 	return &pb.AutoCollectResponse{Success: true}, nil
 }
 func (gs *GRPCServer) StopAutoCollect(ctx context.Context, req *pb.StopAutoCollectRequest) (*pb.StopAutoCollectResponse, error) {
-	err := gs.shead.StopAutoCollect(req.Sensor)
+	log.Info().Str("in", "GRPC_API.StopAutoCollect").Str("sensor", req.Sensor).Msg("API Stop Auto Collect")
+	err := gs.shead.StopAutoCollect(sensors.FromString(req.Sensor))
 	if err != nil {
 		return nil, status.Error(codes.Unavailable, fmt.Sprintf("Error: %v", err))
 	}
 	return &pb.StopAutoCollectResponse{Success: true}, nil
+}
+
+func (gs *GRPCServer) GetSensorStatus(ctx context.Context, req *pb.GetSensorStatusRequest) (*pb.GetSensorStatusResponse, error) {
+	log.Info().Str("in", "GRPC_API.GetSensorStatus").Str("sensor", req.Sensor).Msg("API Getting sensor status")
+	enabled := gs.shead.GetSensorStatus(ctx, sensors.FromString(req.Sensor))
+	return &pb.GetSensorStatusResponse{
+		Enabled: enabled,
+	}, nil
 }

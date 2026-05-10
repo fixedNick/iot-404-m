@@ -3,7 +3,7 @@ package serverhead
 import (
 	"context"
 	"errors"
-	"fmt"
+	"server/internal/domain/sensors"
 	"server/internal/mqtt"
 	dbmodels "server/internal/storage/models"
 	db "server/internal/storage/service"
@@ -104,166 +104,17 @@ func (s *ServerHead) GetHumidity(ctx context.Context, lastOnDeadline bool) (dbmo
 
 	return dbHumidity, nil
 }
-func (s *ServerHead) StartAutoCollect(ctx context.Context, sensor string, duration int, period int) error {
-	if duration < 0 || period < 1000 {
-		return fmt.Errorf("Invalid parameters. Duration > 0 & Period >= 1000")
-	}
+
+func (s *ServerHead) GetSensorStatus(ctx context.Context, sensor sensors.Sensor) bool {
+
+	log.Info().Str("in", "ServerHead.GetSensorStatus").Str("sensor", sensor.SQLName()).Msg("Getting sensor status")
 	switch sensor {
-	case string(mqtt.SensorTemperature):
-		if s.autoTempRunning {
-			return fmt.Errorf("WindSpeed Auto Collect already running.")
-		}
-		go s.autoCollecTemperature(duration, period)
-	case string(mqtt.SensorHumidity):
-		if s.autoHumidityRunning {
-			return fmt.Errorf("WindSpeed Auto Collect already running.")
-		}
-		go s.autoCollectHumidity(duration, period)
-	case string(mqtt.SensorWind):
-		if s.autoWindRunning {
-			return fmt.Errorf("WindSpeed Auto Collect already running.")
-		}
-		go s.autoCollectWind(duration, period)
-	default:
-		return fmt.Errorf("Unknown sensor")
+	case sensors.WindSpeed:
+		return s.autoWindRunning
+	case sensors.Temperature:
+		return s.autoTempRunning
+	case sensors.Humidity:
+		return s.autoHumidityRunning
 	}
-	return nil
-}
-
-func (s *ServerHead) autoCollectWind(duration, period int) {
-	s.autoWindRunning = true
-	s.stopAutoWind = make(chan struct{})
-
-	var endTime time.Duration
-	if duration == 0 {
-		// 60.000 hours, endless
-		endTime = time.Hour * time.Duration(60000)
-	} else {
-		endTime = time.Duration(duration) * time.Millisecond
-	}
-
-	tick := time.NewTicker(time.Duration(period) * time.Millisecond)
-	defer tick.Stop()
-
-	for {
-		select {
-		case <-tick.C:
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			wind, err := s.GetWindSpeed(ctx, false)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectWind.GetWindSpeed").AnErr("error", err)
-			}
-			cancel()
-			err = s.storage.SaveWind(context.Background(), wind)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectWind.SaveWind").AnErr("error", err)
-			}
-		case <-time.After(endTime):
-			close(s.stopAutoWind)
-			s.autoWindRunning = false
-			return
-		case <-s.stopAutoWind:
-			s.autoWindRunning = false
-			return
-		}
-	}
-}
-func (s *ServerHead) autoCollecTemperature(duration, period int) {
-	s.autoTempRunning = true
-	s.stopAutoTemp = make(chan struct{})
-
-	var endTime time.Duration
-	if duration == 0 {
-		// 60.000 hours, endless
-		endTime = time.Hour * time.Duration(60000)
-	} else {
-		endTime = time.Duration(duration) * time.Millisecond
-	}
-
-	tick := time.NewTicker(time.Duration(period) * time.Millisecond)
-	defer tick.Stop()
-
-	for {
-		select {
-		case <-tick.C:
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			temp, err := s.GetTemperature(ctx, false)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectTemperature.GetTemperature").AnErr("error", err)
-			}
-			cancel()
-			err = s.storage.SaveTemperature(context.Background(), temp)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectTemperature.SaveTemperature").AnErr("error", err)
-			}
-		case <-time.After(endTime):
-			close(s.stopAutoTemp)
-			s.autoTempRunning = false
-			return
-		case <-s.stopAutoTemp:
-			s.autoTempRunning = false
-			return
-		}
-	}
-}
-func (s *ServerHead) autoCollectHumidity(duration, period int) {
-	s.autoHumidityRunning = true
-	s.stopAutoHumidity = make(chan struct{})
-
-	var endTime time.Duration
-	if duration == 0 {
-		// 60.000 hours, endless
-		endTime = time.Hour * time.Duration(60000)
-	} else {
-		endTime = time.Duration(duration) * time.Millisecond
-	}
-
-	tick := time.NewTicker(time.Duration(period) * time.Millisecond)
-	defer tick.Stop()
-
-	for {
-		select {
-		case <-tick.C:
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			humidity, err := s.GetHumidity(ctx, false)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectHumidity.GetHumidity").AnErr("error", err)
-			}
-			cancel()
-			err = s.storage.SaveHumidity(context.Background(), humidity)
-			if err != nil {
-				log.Error().Str("in", "ServerHead.autoCollectHumidity.SaveHumidity").AnErr("error", err)
-			}
-		case <-time.After(endTime):
-			close(s.stopAutoHumidity)
-			s.autoHumidityRunning = false
-			return
-		case <-s.stopAutoHumidity:
-			s.autoHumidityRunning = false
-			return
-		}
-	}
-}
-
-func (s *ServerHead) StopAutoCollect(sensor string) error {
-	switch sensor {
-	case string(mqtt.SensorTemperature):
-		if s.autoTempRunning {
-			s.stopAutoTemp <- struct{}{}
-			return nil
-		}
-	case string(mqtt.SensorHumidity):
-		if s.autoHumidityRunning {
-			s.stopAutoHumidity <- struct{}{}
-			return nil
-		}
-	case string(mqtt.SensorWind):
-		if s.autoWindRunning {
-			s.stopAutoWind <- struct{}{}
-			return nil
-		}
-	default:
-		return fmt.Errorf("Unknown sensor")
-	}
-	return nil
+	return false
 }

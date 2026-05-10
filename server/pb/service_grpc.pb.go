@@ -22,6 +22,7 @@ const (
 	ESP8266Service_WindSpeed_FullMethodName       = "/iot404.v1.ESP8266Service/WindSpeed"
 	ESP8266Service_Temperature_FullMethodName     = "/iot404.v1.ESP8266Service/Temperature"
 	ESP8266Service_Humidity_FullMethodName        = "/iot404.v1.ESP8266Service/Humidity"
+	ESP8266Service_GetSensorStatus_FullMethodName = "/iot404.v1.ESP8266Service/GetSensorStatus"
 	ESP8266Service_AutoCollect_FullMethodName     = "/iot404.v1.ESP8266Service/AutoCollect"
 	ESP8266Service_StopAutoCollect_FullMethodName = "/iot404.v1.ESP8266Service/StopAutoCollect"
 )
@@ -34,6 +35,7 @@ type ESP8266ServiceClient interface {
 	WindSpeed(ctx context.Context, in *WindSpeedRequest, opts ...grpc.CallOption) (*WindSpeedResponse, error)
 	Temperature(ctx context.Context, in *TemperatureRequest, opts ...grpc.CallOption) (*TemperatureResponse, error)
 	Humidity(ctx context.Context, in *HumidityRequest, opts ...grpc.CallOption) (*HumidityResponse, error)
+	GetSensorStatus(ctx context.Context, in *GetSensorStatusRequest, opts ...grpc.CallOption) (*GetSensorStatusResponse, error)
 	// -- end getters
 	AutoCollect(ctx context.Context, in *AutoCollectRequest, opts ...grpc.CallOption) (*AutoCollectResponse, error)
 	StopAutoCollect(ctx context.Context, in *StopAutoCollectRequest, opts ...grpc.CallOption) (*StopAutoCollectResponse, error)
@@ -77,6 +79,16 @@ func (c *eSP8266ServiceClient) Humidity(ctx context.Context, in *HumidityRequest
 	return out, nil
 }
 
+func (c *eSP8266ServiceClient) GetSensorStatus(ctx context.Context, in *GetSensorStatusRequest, opts ...grpc.CallOption) (*GetSensorStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSensorStatusResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_GetSensorStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *eSP8266ServiceClient) AutoCollect(ctx context.Context, in *AutoCollectRequest, opts ...grpc.CallOption) (*AutoCollectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AutoCollectResponse)
@@ -105,6 +117,7 @@ type ESP8266ServiceServer interface {
 	WindSpeed(context.Context, *WindSpeedRequest) (*WindSpeedResponse, error)
 	Temperature(context.Context, *TemperatureRequest) (*TemperatureResponse, error)
 	Humidity(context.Context, *HumidityRequest) (*HumidityResponse, error)
+	GetSensorStatus(context.Context, *GetSensorStatusRequest) (*GetSensorStatusResponse, error)
 	// -- end getters
 	AutoCollect(context.Context, *AutoCollectRequest) (*AutoCollectResponse, error)
 	StopAutoCollect(context.Context, *StopAutoCollectRequest) (*StopAutoCollectResponse, error)
@@ -126,6 +139,9 @@ func (UnimplementedESP8266ServiceServer) Temperature(context.Context, *Temperatu
 }
 func (UnimplementedESP8266ServiceServer) Humidity(context.Context, *HumidityRequest) (*HumidityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Humidity not implemented")
+}
+func (UnimplementedESP8266ServiceServer) GetSensorStatus(context.Context, *GetSensorStatusRequest) (*GetSensorStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSensorStatus not implemented")
 }
 func (UnimplementedESP8266ServiceServer) AutoCollect(context.Context, *AutoCollectRequest) (*AutoCollectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AutoCollect not implemented")
@@ -208,6 +224,24 @@ func _ESP8266Service_Humidity_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ESP8266Service_GetSensorStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSensorStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).GetSensorStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_GetSensorStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).GetSensorStatus(ctx, req.(*GetSensorStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ESP8266Service_AutoCollect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AutoCollectRequest)
 	if err := dec(in); err != nil {
@@ -262,6 +296,10 @@ var ESP8266Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Humidity",
 			Handler:    _ESP8266Service_Humidity_Handler,
+		},
+		{
+			MethodName: "GetSensorStatus",
+			Handler:    _ESP8266Service_GetSensorStatus_Handler,
 		},
 		{
 			MethodName: "AutoCollect",

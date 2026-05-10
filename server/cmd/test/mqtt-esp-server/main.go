@@ -14,8 +14,8 @@ func main() {
 
 	godotenv.Load([]string{"../env/test/.env.go.app", "../env/test/.env.db"}...)
 	s := mqttespserver.New(cfg.MustLoadConfig(), &mqttespserver.MockConfig{
-		MinDelay: 500,
-		MaxDelay: 1500,
+		MinDelay: 100,
+		MaxDelay: 350,
 		LogFile:  "mqtt-esp-server.log",
 	})
 
