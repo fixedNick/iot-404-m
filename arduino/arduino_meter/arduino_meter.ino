@@ -1,16 +1,16 @@
 #include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
+// #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include <DHT11.h>
 
-DHT11 dht11(2);
-
 #define INPUT_VOLTAGE_PIN A0
-#define INPUT_TEMP_PIN A1
+#define INPUT_TEMP_PIN 3
 #define INPUT_HUMIDITY_PIN 2
 
-#define SPEED_MLT 21.375
+#define SPEED_MULTIPLIER 21.375
 
 #define ARDUINO_GSM_RX_PIN 3
 #define ARDUINO_GSM_TX_PIN 4
@@ -18,23 +18,41 @@ DHT11 dht11(2);
 #define ARDUINO_ESP_RX_PIN 6
 #define ARDUINO_ESP_TX_PIN 5
 
+DHT11 dht11(INPUT_HUMIDITY_PIN);
+
+OneWire oneWire(INPUT_TEMP_PIN);
+DallasTemperature sensors(&oneWire);
+
 //SoftwareSerial gsmSerial(ARDUINO_GSM_RX_PIN, ARDUINO_GSM_TX_PIN);
 SoftwareSerial espSerial(ARDUINO_ESP_RX_PIN, ARDUINO_ESP_TX_PIN);
 
 //LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+// temp reader
+float LAST_TEMPERATURE = -1;
+int temperature_last_read = 0;
+int temperature_read_cooldown = 5000;
+// 
 void setup() {
 	// lcd.begin();
   espSerial.begin(9600);
   // espSerial.listen();
   // gsmSerial.begin(9600);
   pinMode(INPUT_VOLTAGE_PIN, INPUT);
+  sensors.begin();
   //setupDisplay();
 }
 char voltBuffer[10];
 char speedbuffer[10];
 
 void loop() {
+  int mils = millis();
+  if (mils + temperature_read_cooldown >= temperature_last_read) {
+    // update temp value by cooldown
+    temperature_last_read = mils;
+    LAST_TEMPERATURE = getTemperature();
+  }
+
   // float voltage = getVoltageAvg();
   // printOnDisplay(voltage);
   if (espSerial.available() > 0) {
@@ -55,11 +73,11 @@ void loop() {
             if (doc["sensor"] == "wind") {
               float voltage = getVoltageAvg();
               doc["voltage"] = voltage;
-              doc["speed"] = voltage * SPEED_MLT;
+              doc["speed"] = voltage * SPEED_MULTIPLIER;
               sendResponse(espSerial, doc);
             }
             else if (strcmp(sensor, "temperature") == 0) {
-              doc["temperature"] = getTemperature();
+              doc["temperature"] = LAST_TEMPERATURE;
               sendResponse(espSerial, doc);
             } 
             else if (strcmp(sensor, "humidity") == 0) {
@@ -110,7 +128,7 @@ void sendResponse(SoftwareSerial to, StaticJsonDocument<200> resp) {
 //   lcd.setCursor(6,1);
 //   lcd.print("         ");
 //   lcd.setCursor(6, 1);
-//   dtostrf(voltage * SPEED_MLT, 6, 3, speedbuffer);
+//   dtostrf(voltage * SPEED_MULTIPLIER, 6, 3, speedbuffer);
 //   float f = voltage;
 //   lcd.print(speedbuffer);
 // }
@@ -130,13 +148,11 @@ float getVoltageAvg() {
 }
 
 float getTemperature() {
-  float sum = 0;
-  for(int i = 0; i < 10; i++) {
-    float raw = analogRead(INPUT_TEMP_PIN);
-    sum += raw;
-    delay(2);
-  }
+  sensors.requestTemperatures(); 
+  
+  float tempC = sensors.getTempCByIndex(0); 
 
-  float temp = sum/10/1023.0*500.0;
-  return temp;
+  if(tempC != DEVICE_DISCONNECTED_C) 
+    return tempC;
+  return LAST_TEMPERATURE;
 }
