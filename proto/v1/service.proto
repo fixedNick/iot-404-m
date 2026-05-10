@@ -8,10 +8,19 @@ service ESP8266Service {
   rpc WindSpeed (WindSpeedRequest) returns (WindSpeedResponse) {}
   rpc Temperature (TemperatureRequest) returns (TemperatureResponse) {}
   rpc Humidity (HumidityRequest) returns (HumidityResponse) {}
+  rpc GetSensorStatus (GetSensorStatusRequest) returns (GetSensorStatusResponse) {}
   // -- end getters
   rpc AutoCollect (AutoCollectRequest) returns (AutoCollectResponse) {}
   rpc StopAutoCollect (StopAutoCollectRequest) returns (StopAutoCollectResponse) {}
 }
+message GetSensorStatusRequest {
+  string sensor = 1;
+}
+
+message GetSensorStatusResponse {
+  bool enabled = 1;
+}
+
 message WindSpeedRequest {}
 message TemperatureRequest {}
 message HumidityRequest {}
