@@ -5,8 +5,8 @@
 #include <PubSubClient.h>
 
 // Укажите данные вашей сети
-const char* ssid = "Keenetic-8324";
-const char* password = "77bis20-227-ogj";
+const char* ssid = "Keenetic-9163";
+const char* password = "APv7oY6d";
 const char* mqtt_server = "176.109.106.237";
 
 #define ESP_RX 4 // 4 // GPIO4
