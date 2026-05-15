@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	cfg "server/internal/config"
+	"server/internal/domain/period"
 	"server/internal/domain/sensors"
 	serverhead "server/internal/server_head"
 	pb "server/pb"
@@ -129,4 +130,30 @@ func (gs *GRPCServer) GetSensorStatus(ctx context.Context, req *pb.GetSensorStat
 	return &pb.GetSensorStatusResponse{
 		Enabled: enabled,
 	}, nil
+}
+
+/*
+Day:
+
+	offset 0:
+	  from TODAY 00:00:00 UPTO current_time
+	offset -1:
+	  from YESTERDAY 00:00:00 UPTO YESTERDAY 23:59:59
+
+Week:
+
+	offset 0: [7 days]
+	  upto NOW from [now-6 days]:7days
+	offset -1:
+	  upto [NOW-7] from NOW-14
+
+Month:
+
+	offset 0:
+	  current month
+	offset -1:
+	  current month - 1
+*/
+func (gs *GRPCServer) GetSensorStats(ctx context.Context, req *pb.GetSensorStatsRequest) (*pb.GetSensorStatsResponse, error) {
+	return gs.shead.GetSensorStats(ctx, period.FromProtobuf(req.Period), sensors.FromProtobuf(req.Sensor), int(req.PeriodOffset))
 }

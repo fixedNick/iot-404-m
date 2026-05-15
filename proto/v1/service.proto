@@ -3,6 +3,8 @@ syntax = "proto3";
 package iot404.v1;
 option go_package = "./pb";
 
+import "google/protobuf/timestamp.proto";
+
 service ESP8266Service {
   // -- getters
   rpc WindSpeed (WindSpeedRequest) returns (WindSpeedResponse) {}
@@ -12,6 +14,8 @@ service ESP8266Service {
   // -- end getters
   rpc AutoCollect (AutoCollectRequest) returns (AutoCollectResponse) {}
   rpc StopAutoCollect (StopAutoCollectRequest) returns (StopAutoCollectResponse) {}
+  // --
+  rpc GetSensorStats(GetSensorStatsRequest) returns (GetSensorStatsResponse);
 }
 message GetSensorStatusRequest {
   string sensor = 1;
@@ -50,4 +54,48 @@ message AutoCollectResponse {
 }
 message StopAutoCollectResponse {
   bool success = 1;
+}
+
+// Типы сенсоров
+enum SensorType {
+  SENSOR_TYPE_UNSPECIFIED = 0;
+  SENSOR_TYPE_TEMPERATURE = 1;
+  SENSOR_TYPE_HUMIDITY = 2;
+  SENSOR_TYPE_WIND = 3;
+}
+
+// Типы временных периодов
+enum PeriodType {
+  PERIOD_TYPE_UNSPECIFIED = 0;
+  PERIOD_TYPE_DAY = 1;
+  PERIOD_TYPE_WEEK = 2;
+  PERIOD_TYPE_MONTH = 3;
+}
+
+// Запрос статистики
+message GetSensorStatsRequest {
+  SensorType sensor = 1;
+  PeriodType period = 2;
+  int32 period_offset = 3; // 0 - текущий, -1 - предыдущий и т.д.
+}
+
+// Точка данных для Дня (сырые логи показаний)
+message DayDataPoint {
+  google.protobuf.Timestamp timestamp = 1;
+  double value = 2;
+}
+
+// Точка данных для Недели/Месяца (агрегированная за конкретные сутки)
+message AggregatedDataPoint {
+  google.protobuf.Timestamp date = 1; // Полночь целевого дня
+  double min = 2;
+  double max = 3;
+  double avg = 4;
+}
+
+// Финальный ответ сервера
+message GetSensorStatsResponse {
+  // Сервер наполняет только ОДИН из этих массивов в зависимости от запрошенного PeriodType
+  repeated DayDataPoint day_data = 1;
+  repeated AggregatedDataPoint aggregated_data = 2;
 }

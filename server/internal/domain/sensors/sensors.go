@@ -1,5 +1,7 @@
 package sensors
 
+import "server/pb"
+
 type Sensor string
 
 const (
@@ -31,5 +33,17 @@ func FromString(sensor_name string) Sensor {
 		return Humidity
 	default:
 		panic("Unknown sensor")
+	}
+}
+func FromProtobuf(s pb.SensorType) Sensor {
+	switch s {
+	case pb.SensorType_SENSOR_TYPE_WIND:
+		return WindSpeed
+	case pb.SensorType_SENSOR_TYPE_TEMPERATURE:
+		return Temperature
+	case pb.SensorType_SENSOR_TYPE_HUMIDITY:
+		return Humidity
+	default:
+		return Temperature
 	}
 }

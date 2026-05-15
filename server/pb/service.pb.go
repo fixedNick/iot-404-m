@@ -9,6 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -20,6 +21,112 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+// Типы сенсоров
+type SensorType int32
+
+const (
+	SensorType_SENSOR_TYPE_UNSPECIFIED SensorType = 0
+	SensorType_SENSOR_TYPE_TEMPERATURE SensorType = 1
+	SensorType_SENSOR_TYPE_HUMIDITY    SensorType = 2
+	SensorType_SENSOR_TYPE_WIND        SensorType = 3
+)
+
+// Enum value maps for SensorType.
+var (
+	SensorType_name = map[int32]string{
+		0: "SENSOR_TYPE_UNSPECIFIED",
+		1: "SENSOR_TYPE_TEMPERATURE",
+		2: "SENSOR_TYPE_HUMIDITY",
+		3: "SENSOR_TYPE_WIND",
+	}
+	SensorType_value = map[string]int32{
+		"SENSOR_TYPE_UNSPECIFIED": 0,
+		"SENSOR_TYPE_TEMPERATURE": 1,
+		"SENSOR_TYPE_HUMIDITY":    2,
+		"SENSOR_TYPE_WIND":        3,
+	}
+)
+
+func (x SensorType) Enum() *SensorType {
+	p := new(SensorType)
+	*p = x
+	return p
+}
+
+func (x SensorType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SensorType) Descriptor() protoreflect.EnumDescriptor {
+	return file_service_proto_enumTypes[0].Descriptor()
+}
+
+func (SensorType) Type() protoreflect.EnumType {
+	return &file_service_proto_enumTypes[0]
+}
+
+func (x SensorType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SensorType.Descriptor instead.
+func (SensorType) EnumDescriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{0}
+}
+
+// Типы временных периодов
+type PeriodType int32
+
+const (
+	PeriodType_PERIOD_TYPE_UNSPECIFIED PeriodType = 0
+	PeriodType_PERIOD_TYPE_DAY         PeriodType = 1
+	PeriodType_PERIOD_TYPE_WEEK        PeriodType = 2
+	PeriodType_PERIOD_TYPE_MONTH       PeriodType = 3
+)
+
+// Enum value maps for PeriodType.
+var (
+	PeriodType_name = map[int32]string{
+		0: "PERIOD_TYPE_UNSPECIFIED",
+		1: "PERIOD_TYPE_DAY",
+		2: "PERIOD_TYPE_WEEK",
+		3: "PERIOD_TYPE_MONTH",
+	}
+	PeriodType_value = map[string]int32{
+		"PERIOD_TYPE_UNSPECIFIED": 0,
+		"PERIOD_TYPE_DAY":         1,
+		"PERIOD_TYPE_WEEK":        2,
+		"PERIOD_TYPE_MONTH":       3,
+	}
+)
+
+func (x PeriodType) Enum() *PeriodType {
+	p := new(PeriodType)
+	*p = x
+	return p
+}
+
+func (x PeriodType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PeriodType) Descriptor() protoreflect.EnumDescriptor {
+	return file_service_proto_enumTypes[1].Descriptor()
+}
+
+func (PeriodType) Type() protoreflect.EnumType {
+	return &file_service_proto_enumTypes[1]
+}
+
+func (x PeriodType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PeriodType.Descriptor instead.
+func (PeriodType) EnumDescriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{1}
+}
 
 type GetSensorStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -573,11 +680,248 @@ func (x *StopAutoCollectResponse) GetSuccess() bool {
 	return false
 }
 
+// Запрос статистики
+type GetSensorStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sensor        SensorType             `protobuf:"varint,1,opt,name=sensor,proto3,enum=iot404.v1.SensorType" json:"sensor,omitempty"`
+	Period        PeriodType             `protobuf:"varint,2,opt,name=period,proto3,enum=iot404.v1.PeriodType" json:"period,omitempty"`
+	PeriodOffset  int32                  `protobuf:"varint,3,opt,name=period_offset,json=periodOffset,proto3" json:"period_offset,omitempty"` // 0 - текущий, -1 - предыдущий и т.д.
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSensorStatsRequest) Reset() {
+	*x = GetSensorStatsRequest{}
+	mi := &file_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSensorStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSensorStatsRequest) ProtoMessage() {}
+
+func (x *GetSensorStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSensorStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetSensorStatsRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetSensorStatsRequest) GetSensor() SensorType {
+	if x != nil {
+		return x.Sensor
+	}
+	return SensorType_SENSOR_TYPE_UNSPECIFIED
+}
+
+func (x *GetSensorStatsRequest) GetPeriod() PeriodType {
+	if x != nil {
+		return x.Period
+	}
+	return PeriodType_PERIOD_TYPE_UNSPECIFIED
+}
+
+func (x *GetSensorStatsRequest) GetPeriodOffset() int32 {
+	if x != nil {
+		return x.PeriodOffset
+	}
+	return 0
+}
+
+// Точка данных для Дня (сырые логи показаний)
+type DayDataPoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Value         float64                `protobuf:"fixed64,2,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DayDataPoint) Reset() {
+	*x = DayDataPoint{}
+	mi := &file_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DayDataPoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DayDataPoint) ProtoMessage() {}
+
+func (x *DayDataPoint) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DayDataPoint.ProtoReflect.Descriptor instead.
+func (*DayDataPoint) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *DayDataPoint) GetTimestamp() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Timestamp
+	}
+	return nil
+}
+
+func (x *DayDataPoint) GetValue() float64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+// Точка данных для Недели/Месяца (агрегированная за конкретные сутки)
+type AggregatedDataPoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Date          *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"` // Полночь целевого дня
+	Min           float64                `protobuf:"fixed64,2,opt,name=min,proto3" json:"min,omitempty"`
+	Max           float64                `protobuf:"fixed64,3,opt,name=max,proto3" json:"max,omitempty"`
+	Avg           float64                `protobuf:"fixed64,4,opt,name=avg,proto3" json:"avg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AggregatedDataPoint) Reset() {
+	*x = AggregatedDataPoint{}
+	mi := &file_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AggregatedDataPoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AggregatedDataPoint) ProtoMessage() {}
+
+func (x *AggregatedDataPoint) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AggregatedDataPoint.ProtoReflect.Descriptor instead.
+func (*AggregatedDataPoint) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *AggregatedDataPoint) GetDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Date
+	}
+	return nil
+}
+
+func (x *AggregatedDataPoint) GetMin() float64 {
+	if x != nil {
+		return x.Min
+	}
+	return 0
+}
+
+func (x *AggregatedDataPoint) GetMax() float64 {
+	if x != nil {
+		return x.Max
+	}
+	return 0
+}
+
+func (x *AggregatedDataPoint) GetAvg() float64 {
+	if x != nil {
+		return x.Avg
+	}
+	return 0
+}
+
+// Финальный ответ сервера
+type GetSensorStatsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Сервер наполняет только ОДИН из этих массивов в зависимости от запрошенного PeriodType
+	DayData        []*DayDataPoint        `protobuf:"bytes,1,rep,name=day_data,json=dayData,proto3" json:"day_data,omitempty"`
+	AggregatedData []*AggregatedDataPoint `protobuf:"bytes,2,rep,name=aggregated_data,json=aggregatedData,proto3" json:"aggregated_data,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetSensorStatsResponse) Reset() {
+	*x = GetSensorStatsResponse{}
+	mi := &file_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSensorStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSensorStatsResponse) ProtoMessage() {}
+
+func (x *GetSensorStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSensorStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetSensorStatsResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetSensorStatsResponse) GetDayData() []*DayDataPoint {
+	if x != nil {
+		return x.DayData
+	}
+	return nil
+}
+
+func (x *GetSensorStatsResponse) GetAggregatedData() []*AggregatedDataPoint {
+	if x != nil {
+		return x.AggregatedData
+	}
+	return nil
+}
+
 var File_service_proto protoreflect.FileDescriptor
 
 const file_service_proto_rawDesc = "" +
 	"\n" +
-	"\rservice.proto\x12\tiot404.v1\"0\n" +
+	"\rservice.proto\x12\tiot404.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"0\n" +
 	"\x16GetSensorStatusRequest\x12\x16\n" +
 	"\x06sensor\x18\x01 \x01(\tR\x06sensor\"3\n" +
 	"\x17GetSensorStatusResponse\x12\x18\n" +
@@ -604,14 +948,42 @@ const file_service_proto_rawDesc = "" +
 	"\x13AutoCollectResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"3\n" +
 	"\x17StopAutoCollectResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xf9\x03\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x9a\x01\n" +
+	"\x15GetSensorStatsRequest\x12-\n" +
+	"\x06sensor\x18\x01 \x01(\x0e2\x15.iot404.v1.SensorTypeR\x06sensor\x12-\n" +
+	"\x06period\x18\x02 \x01(\x0e2\x15.iot404.v1.PeriodTypeR\x06period\x12#\n" +
+	"\rperiod_offset\x18\x03 \x01(\x05R\fperiodOffset\"^\n" +
+	"\fDayDataPoint\x128\n" +
+	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x01R\x05value\"{\n" +
+	"\x13AggregatedDataPoint\x12.\n" +
+	"\x04date\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04date\x12\x10\n" +
+	"\x03min\x18\x02 \x01(\x01R\x03min\x12\x10\n" +
+	"\x03max\x18\x03 \x01(\x01R\x03max\x12\x10\n" +
+	"\x03avg\x18\x04 \x01(\x01R\x03avg\"\x95\x01\n" +
+	"\x16GetSensorStatsResponse\x122\n" +
+	"\bday_data\x18\x01 \x03(\v2\x17.iot404.v1.DayDataPointR\adayData\x12G\n" +
+	"\x0faggregated_data\x18\x02 \x03(\v2\x1e.iot404.v1.AggregatedDataPointR\x0eaggregatedData*v\n" +
+	"\n" +
+	"SensorType\x12\x1b\n" +
+	"\x17SENSOR_TYPE_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17SENSOR_TYPE_TEMPERATURE\x10\x01\x12\x18\n" +
+	"\x14SENSOR_TYPE_HUMIDITY\x10\x02\x12\x14\n" +
+	"\x10SENSOR_TYPE_WIND\x10\x03*k\n" +
+	"\n" +
+	"PeriodType\x12\x1b\n" +
+	"\x17PERIOD_TYPE_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fPERIOD_TYPE_DAY\x10\x01\x12\x14\n" +
+	"\x10PERIOD_TYPE_WEEK\x10\x02\x12\x15\n" +
+	"\x11PERIOD_TYPE_MONTH\x10\x032\xd0\x04\n" +
 	"\x0eESP8266Service\x12H\n" +
 	"\tWindSpeed\x12\x1b.iot404.v1.WindSpeedRequest\x1a\x1c.iot404.v1.WindSpeedResponse\"\x00\x12N\n" +
 	"\vTemperature\x12\x1d.iot404.v1.TemperatureRequest\x1a\x1e.iot404.v1.TemperatureResponse\"\x00\x12E\n" +
 	"\bHumidity\x12\x1a.iot404.v1.HumidityRequest\x1a\x1b.iot404.v1.HumidityResponse\"\x00\x12Z\n" +
 	"\x0fGetSensorStatus\x12!.iot404.v1.GetSensorStatusRequest\x1a\".iot404.v1.GetSensorStatusResponse\"\x00\x12N\n" +
 	"\vAutoCollect\x12\x1d.iot404.v1.AutoCollectRequest\x1a\x1e.iot404.v1.AutoCollectResponse\"\x00\x12Z\n" +
-	"\x0fStopAutoCollect\x12!.iot404.v1.StopAutoCollectRequest\x1a\".iot404.v1.StopAutoCollectResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\x0fStopAutoCollect\x12!.iot404.v1.StopAutoCollectRequest\x1a\".iot404.v1.StopAutoCollectResponse\"\x00\x12U\n" +
+	"\x0eGetSensorStats\x12 .iot404.v1.GetSensorStatsRequest\x1a!.iot404.v1.GetSensorStatsResponseB\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_service_proto_rawDescOnce sync.Once
@@ -625,39 +997,55 @@ func file_service_proto_rawDescGZIP() []byte {
 	return file_service_proto_rawDescData
 }
 
-var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_service_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_service_proto_goTypes = []any{
-	(*GetSensorStatusRequest)(nil),  // 0: iot404.v1.GetSensorStatusRequest
-	(*GetSensorStatusResponse)(nil), // 1: iot404.v1.GetSensorStatusResponse
-	(*WindSpeedRequest)(nil),        // 2: iot404.v1.WindSpeedRequest
-	(*TemperatureRequest)(nil),      // 3: iot404.v1.TemperatureRequest
-	(*HumidityRequest)(nil),         // 4: iot404.v1.HumidityRequest
-	(*WindSpeedResponse)(nil),       // 5: iot404.v1.WindSpeedResponse
-	(*TemperatureResponse)(nil),     // 6: iot404.v1.TemperatureResponse
-	(*HumidityResponse)(nil),        // 7: iot404.v1.HumidityResponse
-	(*StopAutoCollectRequest)(nil),  // 8: iot404.v1.StopAutoCollectRequest
-	(*AutoCollectRequest)(nil),      // 9: iot404.v1.AutoCollectRequest
-	(*AutoCollectResponse)(nil),     // 10: iot404.v1.AutoCollectResponse
-	(*StopAutoCollectResponse)(nil), // 11: iot404.v1.StopAutoCollectResponse
+	(SensorType)(0),                 // 0: iot404.v1.SensorType
+	(PeriodType)(0),                 // 1: iot404.v1.PeriodType
+	(*GetSensorStatusRequest)(nil),  // 2: iot404.v1.GetSensorStatusRequest
+	(*GetSensorStatusResponse)(nil), // 3: iot404.v1.GetSensorStatusResponse
+	(*WindSpeedRequest)(nil),        // 4: iot404.v1.WindSpeedRequest
+	(*TemperatureRequest)(nil),      // 5: iot404.v1.TemperatureRequest
+	(*HumidityRequest)(nil),         // 6: iot404.v1.HumidityRequest
+	(*WindSpeedResponse)(nil),       // 7: iot404.v1.WindSpeedResponse
+	(*TemperatureResponse)(nil),     // 8: iot404.v1.TemperatureResponse
+	(*HumidityResponse)(nil),        // 9: iot404.v1.HumidityResponse
+	(*StopAutoCollectRequest)(nil),  // 10: iot404.v1.StopAutoCollectRequest
+	(*AutoCollectRequest)(nil),      // 11: iot404.v1.AutoCollectRequest
+	(*AutoCollectResponse)(nil),     // 12: iot404.v1.AutoCollectResponse
+	(*StopAutoCollectResponse)(nil), // 13: iot404.v1.StopAutoCollectResponse
+	(*GetSensorStatsRequest)(nil),   // 14: iot404.v1.GetSensorStatsRequest
+	(*DayDataPoint)(nil),            // 15: iot404.v1.DayDataPoint
+	(*AggregatedDataPoint)(nil),     // 16: iot404.v1.AggregatedDataPoint
+	(*GetSensorStatsResponse)(nil),  // 17: iot404.v1.GetSensorStatsResponse
+	(*timestamppb.Timestamp)(nil),   // 18: google.protobuf.Timestamp
 }
 var file_service_proto_depIdxs = []int32{
-	2,  // 0: iot404.v1.ESP8266Service.WindSpeed:input_type -> iot404.v1.WindSpeedRequest
-	3,  // 1: iot404.v1.ESP8266Service.Temperature:input_type -> iot404.v1.TemperatureRequest
-	4,  // 2: iot404.v1.ESP8266Service.Humidity:input_type -> iot404.v1.HumidityRequest
-	0,  // 3: iot404.v1.ESP8266Service.GetSensorStatus:input_type -> iot404.v1.GetSensorStatusRequest
-	9,  // 4: iot404.v1.ESP8266Service.AutoCollect:input_type -> iot404.v1.AutoCollectRequest
-	8,  // 5: iot404.v1.ESP8266Service.StopAutoCollect:input_type -> iot404.v1.StopAutoCollectRequest
-	5,  // 6: iot404.v1.ESP8266Service.WindSpeed:output_type -> iot404.v1.WindSpeedResponse
-	6,  // 7: iot404.v1.ESP8266Service.Temperature:output_type -> iot404.v1.TemperatureResponse
-	7,  // 8: iot404.v1.ESP8266Service.Humidity:output_type -> iot404.v1.HumidityResponse
-	1,  // 9: iot404.v1.ESP8266Service.GetSensorStatus:output_type -> iot404.v1.GetSensorStatusResponse
-	10, // 10: iot404.v1.ESP8266Service.AutoCollect:output_type -> iot404.v1.AutoCollectResponse
-	11, // 11: iot404.v1.ESP8266Service.StopAutoCollect:output_type -> iot404.v1.StopAutoCollectResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	0,  // 0: iot404.v1.GetSensorStatsRequest.sensor:type_name -> iot404.v1.SensorType
+	1,  // 1: iot404.v1.GetSensorStatsRequest.period:type_name -> iot404.v1.PeriodType
+	18, // 2: iot404.v1.DayDataPoint.timestamp:type_name -> google.protobuf.Timestamp
+	18, // 3: iot404.v1.AggregatedDataPoint.date:type_name -> google.protobuf.Timestamp
+	15, // 4: iot404.v1.GetSensorStatsResponse.day_data:type_name -> iot404.v1.DayDataPoint
+	16, // 5: iot404.v1.GetSensorStatsResponse.aggregated_data:type_name -> iot404.v1.AggregatedDataPoint
+	4,  // 6: iot404.v1.ESP8266Service.WindSpeed:input_type -> iot404.v1.WindSpeedRequest
+	5,  // 7: iot404.v1.ESP8266Service.Temperature:input_type -> iot404.v1.TemperatureRequest
+	6,  // 8: iot404.v1.ESP8266Service.Humidity:input_type -> iot404.v1.HumidityRequest
+	2,  // 9: iot404.v1.ESP8266Service.GetSensorStatus:input_type -> iot404.v1.GetSensorStatusRequest
+	11, // 10: iot404.v1.ESP8266Service.AutoCollect:input_type -> iot404.v1.AutoCollectRequest
+	10, // 11: iot404.v1.ESP8266Service.StopAutoCollect:input_type -> iot404.v1.StopAutoCollectRequest
+	14, // 12: iot404.v1.ESP8266Service.GetSensorStats:input_type -> iot404.v1.GetSensorStatsRequest
+	7,  // 13: iot404.v1.ESP8266Service.WindSpeed:output_type -> iot404.v1.WindSpeedResponse
+	8,  // 14: iot404.v1.ESP8266Service.Temperature:output_type -> iot404.v1.TemperatureResponse
+	9,  // 15: iot404.v1.ESP8266Service.Humidity:output_type -> iot404.v1.HumidityResponse
+	3,  // 16: iot404.v1.ESP8266Service.GetSensorStatus:output_type -> iot404.v1.GetSensorStatusResponse
+	12, // 17: iot404.v1.ESP8266Service.AutoCollect:output_type -> iot404.v1.AutoCollectResponse
+	13, // 18: iot404.v1.ESP8266Service.StopAutoCollect:output_type -> iot404.v1.StopAutoCollectResponse
+	17, // 19: iot404.v1.ESP8266Service.GetSensorStats:output_type -> iot404.v1.GetSensorStatsResponse
+	13, // [13:20] is the sub-list for method output_type
+	6,  // [6:13] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_service_proto_init() }
@@ -670,13 +1058,14 @@ func file_service_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_service_proto_rawDesc), len(file_service_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   12,
+			NumEnums:      2,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_service_proto_goTypes,
 		DependencyIndexes: file_service_proto_depIdxs,
+		EnumInfos:         file_service_proto_enumTypes,
 		MessageInfos:      file_service_proto_msgTypes,
 	}.Build()
 	File_service_proto = out.File

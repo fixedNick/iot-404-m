@@ -3,10 +3,12 @@ package serverhead
 import (
 	"context"
 	"errors"
+	"server/internal/domain/period"
 	"server/internal/domain/sensors"
 	"server/internal/mqtt"
 	dbmodels "server/internal/storage/models"
 	db "server/internal/storage/service"
+	"server/pb"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -117,4 +119,8 @@ func (s *ServerHead) GetSensorStatus(ctx context.Context, sensor sensors.Sensor)
 		return s.autoHumidityRunning
 	}
 	return false
+}
+
+func (s *ServerHead) GetSensorStats(ctx context.Context, p period.PeriodType, sensor sensors.Sensor, offset int) (*pb.GetSensorStatsResponse, error) {
+	panic("Unimplemented")
 }

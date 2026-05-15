@@ -25,6 +25,7 @@ const (
 	ESP8266Service_GetSensorStatus_FullMethodName = "/iot404.v1.ESP8266Service/GetSensorStatus"
 	ESP8266Service_AutoCollect_FullMethodName     = "/iot404.v1.ESP8266Service/AutoCollect"
 	ESP8266Service_StopAutoCollect_FullMethodName = "/iot404.v1.ESP8266Service/StopAutoCollect"
+	ESP8266Service_GetSensorStats_FullMethodName  = "/iot404.v1.ESP8266Service/GetSensorStats"
 )
 
 // ESP8266ServiceClient is the client API for ESP8266Service service.
@@ -39,6 +40,8 @@ type ESP8266ServiceClient interface {
 	// -- end getters
 	AutoCollect(ctx context.Context, in *AutoCollectRequest, opts ...grpc.CallOption) (*AutoCollectResponse, error)
 	StopAutoCollect(ctx context.Context, in *StopAutoCollectRequest, opts ...grpc.CallOption) (*StopAutoCollectResponse, error)
+	// --
+	GetSensorStats(ctx context.Context, in *GetSensorStatsRequest, opts ...grpc.CallOption) (*GetSensorStatsResponse, error)
 }
 
 type eSP8266ServiceClient struct {
@@ -109,6 +112,16 @@ func (c *eSP8266ServiceClient) StopAutoCollect(ctx context.Context, in *StopAuto
 	return out, nil
 }
 
+func (c *eSP8266ServiceClient) GetSensorStats(ctx context.Context, in *GetSensorStatsRequest, opts ...grpc.CallOption) (*GetSensorStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSensorStatsResponse)
+	err := c.cc.Invoke(ctx, ESP8266Service_GetSensorStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ESP8266ServiceServer is the server API for ESP8266Service service.
 // All implementations must embed UnimplementedESP8266ServiceServer
 // for forward compatibility.
@@ -121,6 +134,8 @@ type ESP8266ServiceServer interface {
 	// -- end getters
 	AutoCollect(context.Context, *AutoCollectRequest) (*AutoCollectResponse, error)
 	StopAutoCollect(context.Context, *StopAutoCollectRequest) (*StopAutoCollectResponse, error)
+	// --
+	GetSensorStats(context.Context, *GetSensorStatsRequest) (*GetSensorStatsResponse, error)
 	mustEmbedUnimplementedESP8266ServiceServer()
 }
 
@@ -148,6 +163,9 @@ func (UnimplementedESP8266ServiceServer) AutoCollect(context.Context, *AutoColle
 }
 func (UnimplementedESP8266ServiceServer) StopAutoCollect(context.Context, *StopAutoCollectRequest) (*StopAutoCollectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method StopAutoCollect not implemented")
+}
+func (UnimplementedESP8266ServiceServer) GetSensorStats(context.Context, *GetSensorStatsRequest) (*GetSensorStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSensorStats not implemented")
 }
 func (UnimplementedESP8266ServiceServer) mustEmbedUnimplementedESP8266ServiceServer() {}
 func (UnimplementedESP8266ServiceServer) testEmbeddedByValue()                        {}
@@ -278,6 +296,24 @@ func _ESP8266Service_StopAutoCollect_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ESP8266Service_GetSensorStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSensorStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ESP8266ServiceServer).GetSensorStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ESP8266Service_GetSensorStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ESP8266ServiceServer).GetSensorStats(ctx, req.(*GetSensorStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ESP8266Service_ServiceDesc is the grpc.ServiceDesc for ESP8266Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -308,6 +344,10 @@ var ESP8266Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StopAutoCollect",
 			Handler:    _ESP8266Service_StopAutoCollect_Handler,
+		},
+		{
+			MethodName: "GetSensorStats",
+			Handler:    _ESP8266Service_GetSensorStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
