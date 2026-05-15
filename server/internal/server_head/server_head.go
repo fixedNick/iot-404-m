@@ -9,6 +9,7 @@ import (
 	dbmodels "server/internal/storage/models"
 	db "server/internal/storage/service"
 	"server/pb"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -25,6 +26,8 @@ type ServerHead struct {
 	autoTempRunning     bool
 	autoHumidityRunning bool
 	autoWindRunning     bool
+
+	mu *sync.RWMutex
 }
 
 func New(mqttClient *mqtt.MQTTClient, storage *db.SensorStorage) *ServerHead {
