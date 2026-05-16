@@ -30,8 +30,10 @@ SoftwareSerial espSerial(ARDUINO_ESP_RX_PIN, ARDUINO_ESP_TX_PIN);
 
 // temp reader
 float LAST_TEMPERATURE = -1;
-int temperature_last_read = 0;
-int temperature_read_cooldown = 5000;
+unsigned long temperature_prev_millis = 0;
+const unsigned long measure_interval = 3000; // Опрос раз в 3 сек
+const unsigned long conversion_time = 800;   // Время на "подумать" датчику
+bool is_measuring = false;
 // 
 void setup() {
 	// lcd.begin();
@@ -40,18 +42,23 @@ void setup() {
   // gsmSerial.begin(9600);
   pinMode(INPUT_VOLTAGE_PIN, INPUT);
   sensors.begin();
+  sensors.setWaitForConversion(false);
   //setupDisplay();
 }
 char voltBuffer[10];
 char speedbuffer[10];
 
 void loop() {
-  int mils = millis();
-  if (mils + temperature_read_cooldown >= temperature_last_read) {
-    // update temp value by cooldown
-    temperature_last_read = mils;
+  unsigned long current_mils  = millis();
+  if (!is_measuring && (current_mils - temperature_prev_millis >= measure_interval)) {
+    sensors.requestTemperatures(); 
+    temperature_prev_millis = current_mils;
+    is_measuring = true; 
+  }
+  if (is_measuring && (current_mils - temperature_prev_millis >= conversion_time)) {
     LAST_TEMPERATURE = getTemperature();
   }
+
 
   // float voltage = getVoltageAvg();
   // printOnDisplay(voltage);
@@ -148,11 +155,10 @@ float getVoltageAvg() {
 }
 
 float getTemperature() {
-  sensors.requestTemperatures(); 
-  
-  float tempC = sensors.getTempCByIndex(0); 
-
-  if(tempC != DEVICE_DISCONNECTED_C) 
+  float tempC = sensors.getTempCByIndex(0);
+  is_measuring = false; 
+  if (tempC != DEVICE_DISCONNECTED_C) {
     return tempC;
+  }
   return LAST_TEMPERATURE;
 }

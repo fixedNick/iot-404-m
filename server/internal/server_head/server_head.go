@@ -3,16 +3,19 @@ package serverhead
 import (
 	"context"
 	"errors"
+	"fmt"
 	"server/internal/domain/period"
 	"server/internal/domain/sensors"
 	"server/internal/mqtt"
 	dbmodels "server/internal/storage/models"
 	db "server/internal/storage/service"
 	"server/pb"
+	"sort"
 	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ServerHead struct {
@@ -125,5 +128,169 @@ func (s *ServerHead) GetSensorStatus(ctx context.Context, sensor sensors.Sensor)
 }
 
 func (s *ServerHead) GetSensorStats(ctx context.Context, p period.PeriodType, sensor sensors.Sensor, offset int) (*pb.GetSensorStatsResponse, error) {
-	panic("Unimplemented")
+	now := time.Now()
+	location := now.Location() // .Local().Location() избыточно, достаточно .Location()
+	var from, to time.Time
+	// 1. Приводим текущий день к 00:00:00 текущей таймзоны
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
+
+	switch p {
+	case period.Day:
+		if offset == 0 {
+			from = todayStart
+			to = now // Для текущего дня верхняя граница — "сейчас"
+		} else {
+			// Сдвигаемся на offset дней назад
+			from = todayStart.AddDate(0, 0, -offset)
+			to = from.AddDate(0, 0, 1) // Ровно начало следующего дня (замена 23:59:59)
+		}
+
+	case period.Week:
+		if offset == 0 {
+			// Окно в 7 дней, заканчивая текущим моментом
+			from = todayStart.AddDate(0, 0, -6)
+			to = now
+		} else {
+			// Прошлые недели: сдвигаем конец окна на offset недель назад
+			// Конец окна — начало следующего дня после целевой недели (для строгого < to)
+			to = todayStart.AddDate(0, 0, -(offset*7)+1)
+			from = to.AddDate(0, 0, -7)
+		}
+
+	case period.Month:
+		if offset == 0 {
+			// Текущий месяц: от 1-го числа до текущего момента
+			from = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location)
+			to = now
+		} else {
+			// Прошлые месяцы: строго по календарным границам
+			from = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location).AddDate(0, -offset, 0)
+			to = from.AddDate(0, 1, 0) // Начало следующего месяца
+		}
+	}
+
+	switch sensor {
+	case sensors.WindSpeed:
+		ws, err := s.storage.GetWindSpeedForPeriod(ctx, from, to)
+		if p == period.Day {
+			dp := make([]*pb.DayDataPoint, 0, len(ws))
+			for _, w := range ws {
+				dp = append(dp, &pb.DayDataPoint{Value: float64(w.Speed), Timestamp: timestamppb.New(time.Unix(w.Time, 0))})
+			}
+			return &pb.GetSensorStatsResponse{
+				DayData: dp,
+			}, err
+		}
+		raw := make([]rawPoint, len(ws))
+		for i, w := range ws {
+			raw[i] = rawPoint{Time: w.Time, Value: float64(w.Speed)}
+		}
+		return &pb.GetSensorStatsResponse{
+			AggregatedData: aggregateByDay(raw),
+		}, nil
+	case sensors.Temperature:
+		ts, err := s.storage.GetTemperatureForPeriod(ctx, from, to)
+		if p == period.Day {
+			dp := make([]*pb.DayDataPoint, 0, len(ts))
+			for _, t := range ts {
+				dp = append(dp, &pb.DayDataPoint{Value: float64(t.Temperature), Timestamp: timestamppb.New(time.Unix(t.Time, 0))})
+			}
+			return &pb.GetSensorStatsResponse{
+				DayData: dp,
+			}, err
+		}
+		raw := make([]rawPoint, len(ts))
+		for i, t := range ts {
+			raw[i] = rawPoint{Time: t.Time, Value: float64(t.Temperature)}
+		}
+		return &pb.GetSensorStatsResponse{
+			AggregatedData: aggregateByDay(raw),
+		}, nil
+	case sensors.Humidity:
+		hs, err := s.storage.GetHumidityForPeriod(ctx, from, to)
+		if p == period.Day {
+			dp := make([]*pb.DayDataPoint, 0, len(hs))
+			for _, h := range hs {
+				dp = append(dp, &pb.DayDataPoint{Value: float64(h.Humidity), Timestamp: timestamppb.New(time.Unix(h.Time, 0))})
+			}
+			return &pb.GetSensorStatsResponse{
+				DayData: dp,
+			}, err
+		}
+		raw := make([]rawPoint, len(hs))
+		for i, h := range hs {
+			raw[i] = rawPoint{Time: h.Time, Value: float64(h.Humidity)}
+		}
+		return &pb.GetSensorStatsResponse{
+			AggregatedData: aggregateByDay(raw),
+		}, nil
+	}
+	return nil, fmt.Errorf("uncaught error on GetSensorStats")
+}
+
+type rawPoint struct {
+	Time  int64
+	Value float64
+}
+
+func aggregateByDay(points []rawPoint) []*pb.AggregatedDataPoint {
+	if len(points) == 0 {
+		return nil
+	}
+
+	// Промежуточная структура для сбора метрик за конкретные сутки
+	type dayStats struct {
+		midnight time.Time
+		min      float64
+		max      float64
+		sum      float64
+		count    int
+	}
+
+	// Группируем по строковому ключу "YYYY-MM-DD"
+	groups := make(map[string]*dayStats)
+
+	for _, p := range points {
+		t := time.Unix(p.Time, 0).Local()
+
+		// Получаем полночь для этих суток
+		midnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+		dayKey := midnight.Format("2006-01-02")
+
+		stats, exists := groups[dayKey]
+		if !exists {
+			stats = &dayStats{
+				midnight: midnight,
+				min:      p.Value,
+				max:      p.Value,
+			}
+			groups[dayKey] = stats
+		}
+
+		if p.Value < stats.min {
+			stats.min = p.Value
+		}
+		if p.Value > stats.max {
+			stats.max = p.Value
+		}
+		stats.sum += p.Value
+		stats.count++
+	}
+
+	// Превращаем карту в упорядоченный или просто плоский слайс Protobuf-структур
+	result := make([]*pb.AggregatedDataPoint, 0, len(groups))
+	for _, stats := range groups {
+		result = append(result, &pb.AggregatedDataPoint{
+			Date: timestamppb.New(stats.midnight),
+			Min:  stats.min,
+			Max:  stats.max,
+			Avg:  stats.sum / float64(stats.count),
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Date.AsTime().Before(result[j].Date.AsTime())
+	})
+
+	return result
 }

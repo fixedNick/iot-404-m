@@ -14,8 +14,124 @@ import 'dart:core' as $core;
 
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $1;
+
+import 'service.pbenum.dart';
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'service.pbenum.dart';
+
+class GetSensorStatusRequest extends $pb.GeneratedMessage {
+  factory GetSensorStatusRequest({
+    $core.String? sensor,
+  }) {
+    final result = create();
+    if (sensor != null) result.sensor = sensor;
+    return result;
+  }
+
+  GetSensorStatusRequest._();
+
+  factory GetSensorStatusRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSensorStatusRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSensorStatusRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'sensor')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatusRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatusRequest copyWith(
+          void Function(GetSensorStatusRequest) updates) =>
+      super.copyWith((message) => updates(message as GetSensorStatusRequest))
+          as GetSensorStatusRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatusRequest create() => GetSensorStatusRequest._();
+  @$core.override
+  GetSensorStatusRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatusRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSensorStatusRequest>(create);
+  static GetSensorStatusRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get sensor => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set sensor($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSensor() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSensor() => $_clearField(1);
+}
+
+class GetSensorStatusResponse extends $pb.GeneratedMessage {
+  factory GetSensorStatusResponse({
+    $core.bool? enabled,
+  }) {
+    final result = create();
+    if (enabled != null) result.enabled = enabled;
+    return result;
+  }
+
+  GetSensorStatusResponse._();
+
+  factory GetSensorStatusResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSensorStatusResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSensorStatusResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'enabled')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatusResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatusResponse copyWith(
+          void Function(GetSensorStatusResponse) updates) =>
+      super.copyWith((message) => updates(message as GetSensorStatusResponse))
+          as GetSensorStatusResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatusResponse create() => GetSensorStatusResponse._();
+  @$core.override
+  GetSensorStatusResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatusResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSensorStatusResponse>(create);
+  static GetSensorStatusResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get enabled => $_getBF(0);
+  @$pb.TagNumber(1)
+  set enabled($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasEnabled() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEnabled() => $_clearField(1);
+}
 
 class WindSpeedRequest extends $pb.GeneratedMessage {
   factory WindSpeedRequest() => create();
@@ -584,6 +700,311 @@ class StopAutoCollectResponse extends $pb.GeneratedMessage {
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
   void clearSuccess() => $_clearField(1);
+}
+
+/// Запрос статистики
+class GetSensorStatsRequest extends $pb.GeneratedMessage {
+  factory GetSensorStatsRequest({
+    SensorType? sensor,
+    PeriodType? period,
+    $core.int? periodOffset,
+  }) {
+    final result = create();
+    if (sensor != null) result.sensor = sensor;
+    if (period != null) result.period = period;
+    if (periodOffset != null) result.periodOffset = periodOffset;
+    return result;
+  }
+
+  GetSensorStatsRequest._();
+
+  factory GetSensorStatsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSensorStatsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSensorStatsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..aE<SensorType>(1, _omitFieldNames ? '' : 'sensor',
+        enumValues: SensorType.values)
+    ..aE<PeriodType>(2, _omitFieldNames ? '' : 'period',
+        enumValues: PeriodType.values)
+    ..aI(3, _omitFieldNames ? '' : 'periodOffset')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatsRequest copyWith(
+          void Function(GetSensorStatsRequest) updates) =>
+      super.copyWith((message) => updates(message as GetSensorStatsRequest))
+          as GetSensorStatsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatsRequest create() => GetSensorStatsRequest._();
+  @$core.override
+  GetSensorStatsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSensorStatsRequest>(create);
+  static GetSensorStatsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  SensorType get sensor => $_getN(0);
+  @$pb.TagNumber(1)
+  set sensor(SensorType value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSensor() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSensor() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  PeriodType get period => $_getN(1);
+  @$pb.TagNumber(2)
+  set period(PeriodType value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPeriod() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPeriod() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get periodOffset => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set periodOffset($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPeriodOffset() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPeriodOffset() => $_clearField(3);
+}
+
+/// Точка данных для Дня (сырые логи показаний)
+class DayDataPoint extends $pb.GeneratedMessage {
+  factory DayDataPoint({
+    $1.Timestamp? timestamp,
+    $core.double? value,
+  }) {
+    final result = create();
+    if (timestamp != null) result.timestamp = timestamp;
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  DayDataPoint._();
+
+  factory DayDataPoint.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DayDataPoint.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DayDataPoint',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..aOM<$1.Timestamp>(1, _omitFieldNames ? '' : 'timestamp',
+        subBuilder: $1.Timestamp.create)
+    ..aD(2, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DayDataPoint clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DayDataPoint copyWith(void Function(DayDataPoint) updates) =>
+      super.copyWith((message) => updates(message as DayDataPoint))
+          as DayDataPoint;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DayDataPoint create() => DayDataPoint._();
+  @$core.override
+  DayDataPoint createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static DayDataPoint getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DayDataPoint>(create);
+  static DayDataPoint? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $1.Timestamp get timestamp => $_getN(0);
+  @$pb.TagNumber(1)
+  set timestamp($1.Timestamp value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTimestamp() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTimestamp() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $1.Timestamp ensureTimestamp() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.double get value => $_getN(1);
+  @$pb.TagNumber(2)
+  set value($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasValue() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearValue() => $_clearField(2);
+}
+
+/// Точка данных для Недели/Месяца (агрегированная за конкретные сутки)
+class AggregatedDataPoint extends $pb.GeneratedMessage {
+  factory AggregatedDataPoint({
+    $1.Timestamp? date,
+    $core.double? min,
+    $core.double? max,
+    $core.double? avg,
+  }) {
+    final result = create();
+    if (date != null) result.date = date;
+    if (min != null) result.min = min;
+    if (max != null) result.max = max;
+    if (avg != null) result.avg = avg;
+    return result;
+  }
+
+  AggregatedDataPoint._();
+
+  factory AggregatedDataPoint.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory AggregatedDataPoint.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AggregatedDataPoint',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..aOM<$1.Timestamp>(1, _omitFieldNames ? '' : 'date',
+        subBuilder: $1.Timestamp.create)
+    ..aD(2, _omitFieldNames ? '' : 'min')
+    ..aD(3, _omitFieldNames ? '' : 'max')
+    ..aD(4, _omitFieldNames ? '' : 'avg')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AggregatedDataPoint clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AggregatedDataPoint copyWith(void Function(AggregatedDataPoint) updates) =>
+      super.copyWith((message) => updates(message as AggregatedDataPoint))
+          as AggregatedDataPoint;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AggregatedDataPoint create() => AggregatedDataPoint._();
+  @$core.override
+  AggregatedDataPoint createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static AggregatedDataPoint getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AggregatedDataPoint>(create);
+  static AggregatedDataPoint? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $1.Timestamp get date => $_getN(0);
+  @$pb.TagNumber(1)
+  set date($1.Timestamp value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDate() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDate() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $1.Timestamp ensureDate() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.double get min => $_getN(1);
+  @$pb.TagNumber(2)
+  set min($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMin() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMin() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get max => $_getN(2);
+  @$pb.TagNumber(3)
+  set max($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasMax() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMax() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.double get avg => $_getN(3);
+  @$pb.TagNumber(4)
+  set avg($core.double value) => $_setDouble(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasAvg() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAvg() => $_clearField(4);
+}
+
+/// Финальный ответ сервера
+class GetSensorStatsResponse extends $pb.GeneratedMessage {
+  factory GetSensorStatsResponse({
+    $core.Iterable<DayDataPoint>? dayData,
+    $core.Iterable<AggregatedDataPoint>? aggregatedData,
+  }) {
+    final result = create();
+    if (dayData != null) result.dayData.addAll(dayData);
+    if (aggregatedData != null) result.aggregatedData.addAll(aggregatedData);
+    return result;
+  }
+
+  GetSensorStatsResponse._();
+
+  factory GetSensorStatsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSensorStatsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSensorStatsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'iot404.v1'),
+      createEmptyInstance: create)
+    ..pPM<DayDataPoint>(1, _omitFieldNames ? '' : 'dayData',
+        subBuilder: DayDataPoint.create)
+    ..pPM<AggregatedDataPoint>(2, _omitFieldNames ? '' : 'aggregatedData',
+        subBuilder: AggregatedDataPoint.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSensorStatsResponse copyWith(
+          void Function(GetSensorStatsResponse) updates) =>
+      super.copyWith((message) => updates(message as GetSensorStatsResponse))
+          as GetSensorStatsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatsResponse create() => GetSensorStatsResponse._();
+  @$core.override
+  GetSensorStatsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSensorStatsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSensorStatsResponse>(create);
+  static GetSensorStatsResponse? _defaultInstance;
+
+  /// Сервер наполняет только ОДИН из этих массивов в зависимости от запрошенного PeriodType
+  @$pb.TagNumber(1)
+  $pb.PbList<DayDataPoint> get dayData => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<AggregatedDataPoint> get aggregatedData => $_getList(1);
 }
 
 const $core.bool _omitFieldNames =

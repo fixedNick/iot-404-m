@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	dbmodels "server/internal/storage/models"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -183,4 +184,65 @@ func (r *MysqlRepository) GetHumidity(ctx context.Context, limit int) ([]dbmodel
 		return nil, fmt.Errorf("Database(humidity) is empty")
 	}
 	return hs, nil
+}
+func (r *MysqlRepository) GetWindSpeedForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.WindSpeed, error) {
+	query := "SELECT voltage, speed, ts FROM wind_speed WHERE ts >= ? AND ts < ?;"
+
+	ws := make([]dbmodels.WindSpeed, 0)
+	rows, err := r.db.QueryContext(ctx, query, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var w dbmodels.WindSpeed
+		err := rows.Scan(&w.Voltage, &w.Speed, &w.Time)
+		if err != nil {
+			return nil, err
+		}
+		ws = append(ws, w)
+	}
+	return ws, nil
+}
+
+func (r *MysqlRepository) GetTemperatureForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.Temperature, error) {
+	query := "SELECT val, ts FROM temperature WHERE ts >= ? AND ts < ?;"
+
+	temps := make([]dbmodels.Temperature, 0)
+	rows, err := r.db.QueryContext(ctx, query, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var t dbmodels.Temperature
+		err := rows.Scan(&t.Temperature, &t.Time)
+		if err != nil {
+			return nil, err
+		}
+		temps = append(temps, t)
+	}
+	return temps, nil
+}
+func (r *MysqlRepository) GetHumidityForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.Humidity, error) {
+	query := "SELECT val, ts FROM humidity WHERE ts >= ? AND ts < ?;"
+
+	hums := make([]dbmodels.Humidity, 0)
+	rows, err := r.db.QueryContext(ctx, query, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var h dbmodels.Humidity
+		err := rows.Scan(&h.Humidity, &h.Time)
+		if err != nil {
+			return nil, err
+		}
+		hums = append(hums, h)
+	}
+	return hums, nil
 }

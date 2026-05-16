@@ -6,6 +6,7 @@ import (
 	cfg "server/internal/config"
 	dbmodels "server/internal/storage/models"
 	"server/internal/storage/repository"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -164,4 +165,14 @@ func (s *SensorStorage) GetLastHumidity(ctx context.Context) (dbmodels.Humidity,
 		return dbmodels.Humidity{}, fmt.Errorf("Database is empty")
 	}
 	return h[0], nil
+}
+
+func (s *SensorStorage) GetWindSpeedForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.WindSpeed, error) {
+	return s.sqlRepo.GetWindSpeedForPeriod(ctx, from, to)
+}
+func (s *SensorStorage) GetTemperatureForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.Temperature, error) {
+	return s.sqlRepo.GetTemperatureForPeriod(ctx, from, to)
+}
+func (s *SensorStorage) GetHumidityForPeriod(ctx context.Context, from, to time.Time) ([]dbmodels.Humidity, error) {
+	return s.sqlRepo.GetHumidityForPeriod(ctx, from, to)
 }

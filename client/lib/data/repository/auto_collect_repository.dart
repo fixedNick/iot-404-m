@@ -32,7 +32,7 @@ class AutoCollectRepository {
       ),
       options: CallOptions(timeout: Duration(seconds: 15)),
     );
-    print("AutoCollect response: ${dto.success}");
+
     return AutoCollectResponse(success: dto.success);
   }
 
@@ -41,7 +41,15 @@ class AutoCollectRepository {
       StopAutoCollectRequest(sensor: sensor),
       options: CallOptions(timeout: Duration(seconds: 15)),
     );
-    print("StopAutoCollect response: ${dto.success}");
     return StopAutoCollectResponse(success: dto.success);
+  }
+
+  Future<bool> getSensorStatus(String sensor) async {
+    var dto = await _client.getSensorStatus(
+      GetSensorStatusRequest(sensor: sensor),
+      options: CallOptions(timeout: Duration(seconds: 15)),
+    );
+
+    return dto.enabled;
   }
 }

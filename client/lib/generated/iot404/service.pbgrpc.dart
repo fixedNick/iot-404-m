@@ -54,6 +54,13 @@ class ESP8266ServiceClient extends $grpc.Client {
     return $createUnaryCall(_$humidity, request, options: options);
   }
 
+  $grpc.ResponseFuture<$0.GetSensorStatusResponse> getSensorStatus(
+    $0.GetSensorStatusRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getSensorStatus, request, options: options);
+  }
+
   /// -- end getters
   $grpc.ResponseFuture<$0.AutoCollectResponse> autoCollect(
     $0.AutoCollectRequest request, {
@@ -67,6 +74,14 @@ class ESP8266ServiceClient extends $grpc.Client {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$stopAutoCollect, request, options: options);
+  }
+
+  /// --
+  $grpc.ResponseFuture<$0.GetSensorStatsResponse> getSensorStats(
+    $0.GetSensorStatsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getSensorStats, request, options: options);
   }
 
   // method descriptors
@@ -86,6 +101,11 @@ class ESP8266ServiceClient extends $grpc.Client {
           '/iot404.v1.ESP8266Service/Humidity',
           ($0.HumidityRequest value) => value.writeToBuffer(),
           $0.HumidityResponse.fromBuffer);
+  static final _$getSensorStatus =
+      $grpc.ClientMethod<$0.GetSensorStatusRequest, $0.GetSensorStatusResponse>(
+          '/iot404.v1.ESP8266Service/GetSensorStatus',
+          ($0.GetSensorStatusRequest value) => value.writeToBuffer(),
+          $0.GetSensorStatusResponse.fromBuffer);
   static final _$autoCollect =
       $grpc.ClientMethod<$0.AutoCollectRequest, $0.AutoCollectResponse>(
           '/iot404.v1.ESP8266Service/AutoCollect',
@@ -96,6 +116,11 @@ class ESP8266ServiceClient extends $grpc.Client {
           '/iot404.v1.ESP8266Service/StopAutoCollect',
           ($0.StopAutoCollectRequest value) => value.writeToBuffer(),
           $0.StopAutoCollectResponse.fromBuffer);
+  static final _$getSensorStats =
+      $grpc.ClientMethod<$0.GetSensorStatsRequest, $0.GetSensorStatsResponse>(
+          '/iot404.v1.ESP8266Service/GetSensorStats',
+          ($0.GetSensorStatsRequest value) => value.writeToBuffer(),
+          $0.GetSensorStatsResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('iot404.v1.ESP8266Service')
@@ -126,6 +151,15 @@ abstract class ESP8266ServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.HumidityRequest.fromBuffer(value),
         ($0.HumidityResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetSensorStatusRequest,
+            $0.GetSensorStatusResponse>(
+        'GetSensorStatus',
+        getSensorStatus_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetSensorStatusRequest.fromBuffer(value),
+        ($0.GetSensorStatusResponse value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$0.AutoCollectRequest, $0.AutoCollectResponse>(
             'AutoCollect',
@@ -144,6 +178,15 @@ abstract class ESP8266ServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.StopAutoCollectRequest.fromBuffer(value),
         ($0.StopAutoCollectResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetSensorStatsRequest,
+            $0.GetSensorStatsResponse>(
+        'GetSensorStats',
+        getSensorStats_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetSensorStatsRequest.fromBuffer(value),
+        ($0.GetSensorStatsResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.WindSpeedResponse> windSpeed_Pre($grpc.ServiceCall $call,
@@ -170,6 +213,15 @@ abstract class ESP8266ServiceBase extends $grpc.Service {
   $async.Future<$0.HumidityResponse> humidity(
       $grpc.ServiceCall call, $0.HumidityRequest request);
 
+  $async.Future<$0.GetSensorStatusResponse> getSensorStatus_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetSensorStatusRequest> $request) async {
+    return getSensorStatus($call, await $request);
+  }
+
+  $async.Future<$0.GetSensorStatusResponse> getSensorStatus(
+      $grpc.ServiceCall call, $0.GetSensorStatusRequest request);
+
   $async.Future<$0.AutoCollectResponse> autoCollect_Pre($grpc.ServiceCall $call,
       $async.Future<$0.AutoCollectRequest> $request) async {
     return autoCollect($call, await $request);
@@ -186,4 +238,13 @@ abstract class ESP8266ServiceBase extends $grpc.Service {
 
   $async.Future<$0.StopAutoCollectResponse> stopAutoCollect(
       $grpc.ServiceCall call, $0.StopAutoCollectRequest request);
+
+  $async.Future<$0.GetSensorStatsResponse> getSensorStats_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetSensorStatsRequest> $request) async {
+    return getSensorStats($call, await $request);
+  }
+
+  $async.Future<$0.GetSensorStatsResponse> getSensorStats(
+      $grpc.ServiceCall call, $0.GetSensorStatsRequest request);
 }
