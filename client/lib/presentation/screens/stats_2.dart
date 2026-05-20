@@ -13,8 +13,7 @@ import '../../generated/iot404/service.pbgrpc.dart' as pb;
 class SensorStatsScreen extends StatefulWidget {
   final SensorRepository repository;
 
-  const SensorStatsScreen({Key? key, required this.repository})
-    : super(key: key);
+  const SensorStatsScreen({super.key, required this.repository});
 
   @override
   State<SensorStatsScreen> createState() => _SensorStatsScreenState();
@@ -166,21 +165,36 @@ class _SensorStatsScreenState extends State<SensorStatsScreen> {
     return Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: SafeArea(
-        top: false,
+        top: true,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverAppBar(
-              expandedHeight: 120.0,
-              floating: false,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: CupertinoColors.systemBackground,
-              flexibleSpace: FlexibleSpaceBar(
+            SliverPadding(
+              // Задаем фиксированный отступ 20 сверху (и по 4 по бокам для аккуратности)
+              padding: const EdgeInsets.only(top: 20.0, left: 4.0, right: 4.0),
+              sliver: SliverAppBar(
+                // Убираем expandedHeight, делаем высоту фиксированной
+                pinned: true,
+                elevation: 0,
+                automaticallyImplyLeading:
+                    false, // Отключаем дефолтную кнопку Flutter
+                backgroundColor: CupertinoColors.systemBackground,
+
+                // Кнопка назад
+                leading: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(
+                    CupertinoIcons.back,
+                    color: CupertinoColors.activeBlue,
+                    size: 28, // Стандартный размер для иконки назад в iOS
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+
+                // Текст на том же уровне, что и кнопка
                 centerTitle: true,
-                titlePadding: const EdgeInsets.only(bottom: 14),
                 title: Text(
                   'Статистика сенсоров',
                   style: TextStyle(
@@ -493,6 +507,7 @@ class _SensorStatsScreenState extends State<SensorStatsScreen> {
     maxY = (maxY + delta * 0.1).roundToDouble();
 
     double yInterval = (maxY - minY) / 5;
+    yInterval = yInterval == 0 ? 1 : yInterval;
 
     return LineChartData(
       minY: minY,

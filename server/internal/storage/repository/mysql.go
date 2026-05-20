@@ -189,7 +189,7 @@ func (r *MysqlRepository) GetWindSpeedForPeriod(ctx context.Context, from, to ti
 	query := "SELECT voltage, speed, ts FROM wind_speed WHERE ts >= ? AND ts < ?;"
 
 	ws := make([]dbmodels.WindSpeed, 0)
-	rows, err := r.db.QueryContext(ctx, query, from, to)
+	rows, err := r.db.QueryContext(ctx, query, from.Unix(), to.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (r *MysqlRepository) GetTemperatureForPeriod(ctx context.Context, from, to 
 	query := "SELECT val, ts FROM temperature WHERE ts >= ? AND ts < ?;"
 
 	temps := make([]dbmodels.Temperature, 0)
-	rows, err := r.db.QueryContext(ctx, query, from, to)
+	rows, err := r.db.QueryContext(ctx, query, from.Unix(), to.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (r *MysqlRepository) GetHumidityForPeriod(ctx context.Context, from, to tim
 	query := "SELECT val, ts FROM humidity WHERE ts >= ? AND ts < ?;"
 
 	hums := make([]dbmodels.Humidity, 0)
-	rows, err := r.db.QueryContext(ctx, query, from, to)
+	rows, err := r.db.QueryContext(ctx, query, from.Unix(), to.Unix())
 	if err != nil {
 		return nil, err
 	}

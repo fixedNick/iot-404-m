@@ -155,5 +155,19 @@ Month:
 	  current month - 1
 */
 func (gs *GRPCServer) GetSensorStats(ctx context.Context, req *pb.GetSensorStatsRequest) (*pb.GetSensorStatsResponse, error) {
-	return gs.shead.GetSensorStats(ctx, period.FromProtobuf(req.Period), sensors.FromProtobuf(req.Sensor), int(req.PeriodOffset))
+	fmt.Println("period: ", req.Period.String(), "-- sensor: ", req.Sensor.String(), " -- offset: ", req.PeriodOffset)
+	log.Info().Str("period", req.Period.String()).Str("sensor", req.Sensor.String()).Int32("offset", req.PeriodOffset)
+	resp, err := gs.shead.GetSensorStats(ctx, period.FromProtobuf(req.Period), sensors.FromProtobuf(req.Sensor), int(req.PeriodOffset))
+	if err != nil {
+		fmt.Println("Error", err.Error())
+		log.Err(err).Str("in", "GRPCServer.GetSensorStats")
+		return nil, err
+	}
+	fmt.Println("success")
+	for _, dd := range resp.DayData {
+		fmt.Println(dd.Value, " -- ", dd.Timestamp)
+	}
+	fmt.Println("response:", resp.String())
+	log.Info().Str("in", "GRPCServer.GetSensorStats").Str("response", resp.String())
+	return resp, nil
 }

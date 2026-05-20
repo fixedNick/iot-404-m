@@ -6,18 +6,18 @@ import '../../data/repository/wind_repository.dart';
 import '../../data/repository/temp_repository.dart';
 import '../../data/repository/humidity_repository.dart';
 import '../../data/repository/auto_collect_repository.dart';
+import '../../data/repository/sensor_repository.dart';
 
 import '../../data/datasource/wind_remote.dart';
 import '../../data/datasource/temp_remote.dart';
 import '../../data/datasource/humidity_remote.dart';
+import '../../data/datasource/stats_remote.dart';
 
 import '../../domain/models/wind_reading.dart';
 import '../../domain/models/temp_reading.dart';
 import '../../domain/models/humidity_reading.dart';
 
 import 'stats_2.dart';
-
-import '../../data/repository/sensor_repository.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -31,6 +31,7 @@ class _WeatherScreenState extends State<WeatherScreen>
   late final WindRepository windRepo;
   late final TempRepository tempRepo;
   late final HumidityRepository humidityRepo;
+  late final SensorRepository sensorRepo;
 
   WindReading? wind;
   TempReading? temp;
@@ -45,6 +46,7 @@ class _WeatherScreenState extends State<WeatherScreen>
     windRepo = WindRepository(WindRemoteDataSource());
     tempRepo = TempRepository(TempRemoteDataSource());
     humidityRepo = HumidityRepository(HumidityRemoteDataSource());
+    sensorRepo = SensorRepository(StatsDataSource());
 
     _refreshController = AnimationController(
       vsync: this,
@@ -78,6 +80,7 @@ class _WeatherScreenState extends State<WeatherScreen>
         humidity = results[2] as HumidityReading;
       });
     } catch (e) {
+      print("error: $e");
       debugPrint("GRPC error: $e");
     } finally {
       if (mounted) {
@@ -165,7 +168,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                   // Dynamic Large Hero Temp
                   Text(
                     temp == null
-                        ? "22°"
+                        ? "--°"
                         : "${temp!.temperature.toStringAsFixed(1)}°",
                     style: const TextStyle(
                       fontSize: 88,
@@ -242,7 +245,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                         backgroundColor: Colors.transparent,
                         isScrollControlled: true,
                         builder: (_) =>
-                            SensorStatsScreen(repository: SensorRepository()),
+                            SensorStatsScreen(repository: sensorRepo),
                       );
                     },
                     child: ClipRRect(
@@ -639,7 +642,7 @@ class _AutoCollectSheetState extends State<AutoCollectSheet> {
               ),
               SizedBox(width: 8),
               Text(
-                "Сенсор выполняет автосбор",
+                "Автосбор данных",
                 style: TextStyle(
                   color: Color(0xFF30D158),
                   fontSize: 15,

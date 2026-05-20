@@ -1,31 +1,11 @@
-// data/repository/sensor_repository.dart
-import 'package:grpc/grpc.dart';
 import '../../domain/models/sensor_models.dart';
 import '../../generated/iot404/service.pbgrpc.dart' as pb;
-// Предполагаем, что GrpcConfig лежит в корне или соседней папке, скорректируйте путь:
-import '../../core/grpc_config.dart';
+import '../datasource/stats_remote.dart';
 
 class SensorRepository {
-  final ClientChannel _channel;
-  final pb.ESP8266ServiceClient _grpcClient;
-
+  final StatsDataSource remote;
   // Приватный конструктор для правильного переиспользования одного канала
-  SensorRepository._(this._channel)
-    : _grpcClient = pb.ESP8266ServiceClient(_channel);
-
-  // Публичная фабрика — инициализирует канал ровно ОДИН раз
-  factory SensorRepository() {
-    final channel = ClientChannel(
-      GrpcConfig.host,
-      port: GrpcConfig.port,
-      options: ChannelOptions(
-        credentials: ChannelCredentials.insecure(),
-        connectionTimeout: Duration(seconds: GrpcConfig.timeout),
-        idleTimeout: const Duration(minutes: 5), // Защита от PROTOCOL_ERROR
-      ),
-    );
-    return SensorRepository._(channel);
-  }
+  SensorRepository(this.remote);
 
   /// Получение статистики. Типы `pb.SensorType` и `pb.PeriodType` берутся напрямую из Protobuf.
   Future<SensorStatsResult> fetchStats({
@@ -34,19 +14,7 @@ class SensorRepository {
     required int offset,
   }) async {
     try {
-      // 1. Сборка запроса
-      final request = pb.GetSensorStatsRequest()
-        ..sensor = sensor
-        ..period = period
-        ..periodOffset = offset
-            .abs(); // Инвертируем в положительное число для Go бэкенда
-
-      // 2. Сетевой gRPC запрос с таймаутом из вашего конфига
-      final response = await _grpcClient.getSensorStats(
-        request,
-        options: CallOptions(timeout: Duration(seconds: GrpcConfig.timeout)),
-      );
-
+      final response = await remote.getSensorStats(period, sensor, offset);
       // 3. Трансформация Protobuf-ответа в чистые Dart модели для графиков fl_chart
       final dayData = response.dayData
           .map(
@@ -67,19 +35,14 @@ class SensorRepository {
             ),
           )
           .toList();
-
       return SensorStatsResult(
         dayData: dayData,
         aggregatedData: aggregatedData,
       );
     } catch (e) {
+      print("Error in Repo: $e");
       // Перенаправляем ошибку в UI слой для корректного отображения ErrorCard
       rethrow;
     }
-  }
-
-  // Очистка ресурсов при закрытии шторки StatsSheet
-  Future<void> dispose() async {
-    await _channel.shutdown();
   }
 }

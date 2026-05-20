@@ -34,7 +34,7 @@ type ServerHead struct {
 }
 
 func New(mqttClient *mqtt.MQTTClient, storage *db.SensorStorage) *ServerHead {
-	return &ServerHead{mqtt: mqttClient, storage: storage}
+	return &ServerHead{mqtt: mqttClient, storage: storage, mu: &sync.RWMutex{}}
 }
 
 func (s *ServerHead) GetWindSpeed(ctx context.Context, lastOnDeadline bool) (dbmodels.WindSpeed, error) {
@@ -128,46 +128,43 @@ func (s *ServerHead) GetSensorStatus(ctx context.Context, sensor sensors.Sensor)
 }
 
 func (s *ServerHead) GetSensorStats(ctx context.Context, p period.PeriodType, sensor sensors.Sensor, offset int) (*pb.GetSensorStatsResponse, error) {
-	now := time.Now()
-	location := now.Location() // .Local().Location() избыточно, достаточно .Location()
+	location := time.FixedZone("GMT+3", 3*3600)
+	now := time.Now().In(location)
 	var from, to time.Time
-	// 1. Приводим текущий день к 00:00:00 текущей таймзоны
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
-
+	if offset > 0 {
+		offset = -offset
+	}
 	switch p {
 	case period.Day:
 		if offset == 0 {
 			from = todayStart
 			to = now // Для текущего дня верхняя граница — "сейчас"
 		} else {
-			// Сдвигаемся на offset дней назад
-			from = todayStart.AddDate(0, 0, -offset)
+			from = todayStart.AddDate(0, 0, offset)
 			to = from.AddDate(0, 0, 1) // Ровно начало следующего дня (замена 23:59:59)
 		}
 
 	case period.Week:
 		if offset == 0 {
-			// Окно в 7 дней, заканчивая текущим моментом
 			from = todayStart.AddDate(0, 0, -6)
 			to = now
 		} else {
-			// Прошлые недели: сдвигаем конец окна на offset недель назад
-			// Конец окна — начало следующего дня после целевой недели (для строгого < to)
-			to = todayStart.AddDate(0, 0, -(offset*7)+1)
+			to = todayStart.AddDate(0, 0, (offset*7)+1)
 			from = to.AddDate(0, 0, -7)
 		}
 
 	case period.Month:
 		if offset == 0 {
-			// Текущий месяц: от 1-го числа до текущего момента
 			from = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location)
 			to = now
 		} else {
-			// Прошлые месяцы: строго по календарным границам
-			from = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location).AddDate(0, -offset, 0)
+			from = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location).AddDate(0, offset, 0)
 			to = from.AddDate(0, 1, 0) // Начало следующего месяца
 		}
 	}
+	fmt.Println("From:", from, "\nTo:", to)
+	log.Info().Str("in", "ServerHead.GetSensorStats").Time("from", from).Time("to", to)
 
 	switch sensor {
 	case sensors.WindSpeed:
