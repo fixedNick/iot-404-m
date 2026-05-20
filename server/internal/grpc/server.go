@@ -132,42 +132,91 @@ func (gs *GRPCServer) GetSensorStatus(ctx context.Context, req *pb.GetSensorStat
 	}, nil
 }
 
-/*
-Day:
-
-	offset 0:
-	  from TODAY 00:00:00 UPTO current_time
-	offset -1:
-	  from YESTERDAY 00:00:00 UPTO YESTERDAY 23:59:59
-
-Week:
-
-	offset 0: [7 days]
-	  upto NOW from [now-6 days]:7days
-	offset -1:
-	  upto [NOW-7] from NOW-14
-
-Month:
-
-	offset 0:
-	  current month
-	offset -1:
-	  current month - 1
-*/
 func (gs *GRPCServer) GetSensorStats(ctx context.Context, req *pb.GetSensorStatsRequest) (*pb.GetSensorStatsResponse, error) {
-	fmt.Println("period: ", req.Period.String(), "-- sensor: ", req.Sensor.String(), " -- offset: ", req.PeriodOffset)
-	log.Info().Str("period", req.Period.String()).Str("sensor", req.Sensor.String()).Int32("offset", req.PeriodOffset)
 	resp, err := gs.shead.GetSensorStats(ctx, period.FromProtobuf(req.Period), sensors.FromProtobuf(req.Sensor), int(req.PeriodOffset))
+
+	// clean resp points for graph
+
+	isPrevZero := false
+	prevDayDot := 0.0
+	sortedDay := make([]*pb.DayDataPoint, 0)
+	if len(resp.DayData) > 0 {
+		sortedDay = append(sortedDay, resp.DayData[0])
+		if resp.DayData[0].Value == 0 {
+			isPrevZero = true
+		}
+	}
+
+	for _, dd := range resp.DayData {
+		// clean bad values
+		switch req.Sensor {
+		case pb.SensorType_SENSOR_TYPE_HUMIDITY:
+			if dd.Value <= 0 || dd.Value > 100 {
+				continue
+			}
+		case pb.SensorType_SENSOR_TYPE_TEMPERATURE:
+			// check avg temp for day
+			// max delta btw min and avg temp is 12
+			avg := 0.0
+			for _, dd := range resp.DayData {
+				avg += dd.Value
+			}
+			avg /= float64(len(resp.DayData))
+			if (dd.Value > avg+12 || dd.Value < avg-12) && dd.Value == 0 {
+				continue
+			}
+		}
+		// clean zero sequences, save only 1 zero
+		if dd.Value != 0 {
+
+			if dd.Value == prevDayDot {
+				continue
+			}
+
+			prevDayDot = dd.Value
+			sortedDay = append(sortedDay, dd)
+			isPrevZero = false
+			continue
+		}
+
+		if isPrevZero == false {
+			sortedDay = append(sortedDay, dd)
+			isPrevZero = true
+		}
+	}
+
+	sortedAvgData := make([]*pb.AggregatedDataPoint, 0)
+	for _, sd := range resp.AggregatedData {
+		// clean bad values
+		// max delta btw avg & min temp is 12
+		switch req.Sensor {
+		case pb.SensorType_SENSOR_TYPE_TEMPERATURE:
+			if sd.Avg > sd.Min+12 || sd.Avg < sd.Min-12 {
+				continue
+			}
+		case pb.SensorType_SENSOR_TYPE_HUMIDITY:
+			if sd.Max <= 0 || sd.Max > 100 {
+				continue
+			}
+			if sd.Min <= 0 || sd.Min > 100 {
+				continue
+			}
+			if sd.Avg <= 0 || sd.Avg > 100 {
+				continue
+			}
+		}
+		sortedAvgData = append(sortedAvgData, sd)
+	}
+
+	//
+	resp.DayData = sortedDay
+	resp.AggregatedData = sortedAvgData
+	//
+
 	if err != nil {
 		fmt.Println("Error", err.Error())
 		log.Err(err).Str("in", "GRPCServer.GetSensorStats")
 		return nil, err
 	}
-	fmt.Println("success")
-	for _, dd := range resp.DayData {
-		fmt.Println(dd.Value, " -- ", dd.Timestamp)
-	}
-	fmt.Println("response:", resp.String())
-	log.Info().Str("in", "GRPCServer.GetSensorStats").Str("response", resp.String())
 	return resp, nil
 }

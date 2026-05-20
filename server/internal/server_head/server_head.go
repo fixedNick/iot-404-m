@@ -163,8 +163,6 @@ func (s *ServerHead) GetSensorStats(ctx context.Context, p period.PeriodType, se
 			to = from.AddDate(0, 1, 0) // Начало следующего месяца
 		}
 	}
-	fmt.Println("From:", from, "\nTo:", to)
-	log.Info().Str("in", "ServerHead.GetSensorStats").Time("from", from).Time("to", to)
 
 	switch sensor {
 	case sensors.WindSpeed:
